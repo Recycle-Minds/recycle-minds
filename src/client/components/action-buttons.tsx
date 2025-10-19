@@ -33,12 +33,6 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
         Digital Recycler
       </Button>
       <Button
-        variant="outline"
-        className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
-      >
-        Rewards Store
-      </Button>
-      <Button
         variant={activeTab === "recycling-history" ? "default" : "outline"}
         className={
           activeTab === "recycling-history"

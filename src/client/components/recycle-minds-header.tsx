@@ -26,16 +26,16 @@ export function RecycleMindsHeader() {
             $HEAD
           </a>
           <a href="#" className="hover:text-[#00ff00] transition-colors">
-            Coleções NFT
+            NFT Collections
           </a>
           <a href="#" className="text-[#00ff00] hover:text-[#00ff00] transition-colors">
-            Recicladora
+            Digital Recycler
           </a>
           <a href="#" className="hover:text-[#00ff00] transition-colors">
             DeFi
           </a>
           <a href="#" className="hover:text-[#00ff00] transition-colors">
-            Loja
+            Rewards Store
           </a>
         </nav>
 
