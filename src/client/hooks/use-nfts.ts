@@ -57,6 +57,7 @@ export function useNFTs() {
         name: nft.name,
         image: nft.image,
         mint: nft.mint,
+        interface: nft.interface,
         collection: nft.collection ? {
           name: nft.collection.name,
           address: nft.collection.address
@@ -86,7 +87,14 @@ export function useNFTs() {
   }, [connected, publicKey])
 
   const getNFTsByCollection = (collectionAddress: string) => {
-    return nfts.filter(nft => nft.collection?.address === collectionAddress)
+    return nfts.filter(nft => {
+      // If the collectionAddress is actually a mint address (for individual NFTs without collections)
+      if (collectionAddress === nft.mint) {
+        return true
+      }
+      // Otherwise, filter by collection address
+      return nft.collection?.address === collectionAddress
+    })
   }
 
   const burnNFT = async (mintAddress: string) => {

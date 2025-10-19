@@ -17,6 +17,7 @@ export function useRecycling() {
 
   const burnCollection = async (collectionAddress: string) => {
     if (!isConnected) throw new Error('Wallet not connected')
+    if (!publicKey) throw new Error('No wallet')
 
     const nfts = getNFTsByCollection(collectionAddress)
     const burningMints: string[] = []
@@ -30,7 +31,40 @@ export function useRecycling() {
           burningMints.push(nft.mint)
           setBurning(burningMints)
           
-          await burnNFT(nft.mint)
+          // Build and send the actual burn transaction
+          const service = new NFTService(connection)
+          
+          // Handle undefined interface by trying different NFT types
+          let tx
+          const interfaces = nft.interface ? [nft.interface] : ['V1_NFT', 'ProgrammableNFT']
+          
+          for (const interfaceType of interfaces) {
+            try {
+              const nftWithInterface = {
+                ...nft,
+                interface: interfaceType
+              }
+              
+              tx = await service.buildBurnTransactionAuto(nftWithInterface as any, publicKey)
+              break // Success, exit the loop
+            } catch (err) {
+              console.log(`Failed to build transaction for ${nft.mint} with interface ${interfaceType}:`, err)
+              if (interfaceType === interfaces[interfaces.length - 1]) {
+                throw err // Re-throw if this was the last attempt
+              }
+            }
+          }
+          
+          if (!tx) throw new Error('Failed to build transaction for any interface type')
+          
+          tx.feePayer = publicKey
+          const signature = await sendTransaction(tx, connection)
+          await connection.confirmTransaction(signature, 'confirmed')
+
+          // Update stats after successful burn
+          const statsService = new NFTService(connection)
+          await statsService.burnNFT(nft.mint, publicKey)
+
           burnedMints.push(nft.mint)
           setBurnedNFTs(prev => [...prev, nft.mint])
         } catch (err) {
