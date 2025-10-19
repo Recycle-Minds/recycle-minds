@@ -1,34 +1,70 @@
+"use client"
+
+import { useStats } from "@/hooks/use-stats"
+import { useWallet } from '@solana/wallet-adapter-react'
+
 export function RecyclingHistoryTable() {
-  const historyData = [
-    {
-      collection: "Collection Name",
-      network: "Solana",
-      date: "10/02/2025",
-      nftCount: 2,
-      points: 15,
-    },
-    {
-      collection: "Collection Name",
-      network: "Polygon",
-      date: "10/02/2025",
-      nftCount: 23,
-      points: 50,
-    },
-    {
-      collection: "Collection Name",
-      network: "Ethereum",
-      date: "10/02/2025",
-      nftCount: 100,
-      points: 250,
-    },
-    {
-      collection: "Collection Name",
-      network: "Base",
-      date: "10/02/2025",
-      nftCount: 18,
-      points: 28,
-    },
-  ]
+  const { publicKey } = useWallet()
+  const { recycledNFTs } = useStats()
+
+  // Group recycled NFTs by collection and date
+  const historyData = recycledNFTs.reduce((acc, nft) => {
+    const date = new Date(nft.recycledAt).toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    })
+    
+    const key = `${nft.collection}-${date}`
+    
+    if (!acc[key]) {
+      acc[key] = {
+        collection: nft.collection,
+        network: "Solana", // All NFTs are on Solana
+        date: date,
+        nftCount: 0,
+        points: 0,
+        image: nft.image
+      }
+    }
+    
+    acc[key].nftCount += 1
+    acc[key].points += nft.pointsEarned
+    
+    return acc
+  }, {} as Record<string, {
+    collection: string
+    network: string
+    date: string
+    nftCount: number
+    points: number
+    image: string
+  }>)
+
+  const historyArray = Object.values(historyData).sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  // If no recycled NFTs, show empty state
+  if (!publicKey || historyArray.length === 0) {
+    return (
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-[#00ff00] text-center mb-6">HISTORY</h2>
+        <div className="border border-gray-800 rounded-lg overflow-hidden">
+          <div className="p-8 text-center">
+            <p className="text-gray-400 mb-4">
+              {!publicKey ? 'Connect your wallet to view recycling history' : 'No NFTs recycled yet'}
+            </p>
+            {!publicKey && (
+              <p className="text-sm text-gray-500">
+                Your recycling history will appear here once you start recycling NFTs
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const getNetworkIcon = (network: string) => {
     switch (network) {
@@ -100,11 +136,18 @@ export function RecyclingHistoryTable() {
             </tr>
           </thead>
           <tbody>
-            {historyData.map((item, index) => (
+            {historyArray.map((item, index) => (
               <tr key={index} className="border-b border-gray-800 last:border-b-0 hover:bg-gray-900/50">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white" />
+                    <img 
+                      src={item.image} 
+                      alt={item.collection}
+                      className="w-10 h-10 rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.jpg'
+                      }}
+                    />
                     <span className="text-white">{item.collection}</span>
                   </div>
                 </td>
