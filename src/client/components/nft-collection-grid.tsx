@@ -96,61 +96,72 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
     )
   }
 
+  // Get collection name from the first NFT or use a default
+  const collectionName = collectionNFTs.length > 0 ? collectionNFTs[0].collection?.name || 'Unknown Collection' : 'Collection'
+
   return (
     <div>
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">
-          {collectionAddress ? 'Select NFTs to Recycle' : 'All NFTs to Recycle'}
-        </h2>
-        <p className="text-gray-400 text-lg">Owned: {collectionNFTs.length} NFTs</p>
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-white mb-2">{collectionName}</h2>
+        <p className="text-gray-400">Select NFTs to Recycle • {collectionNFTs.length} NFTs</p>
       </div>
 
       {collectionNFTs.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-12 shadow-2xl shadow-black/50 border border-[#292929]">
-            <h3 className="text-2xl font-bold text-gray-300 mb-4">No NFTs Found</h3>
-            <p className="text-gray-500 text-lg">This collection doesn't have any NFTs</p>
+        <div className="text-center py-12">
+          <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-xl p-8 shadow-lg shadow-black/30 border border-[#292929]">
+            <h3 className="text-xl font-bold text-gray-300 mb-2">No NFTs Found</h3>
+            <p className="text-gray-500">This collection doesn't have any NFTs</p>
           </div>
         </div>
       ) : (
         <>
           {/* Control Bar */}
-          <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-6 shadow-2xl shadow-black/50 border border-[#292929] backdrop-blur-sm mb-8">
-            <div className="flex items-center justify-between gap-6">
-              {/* Select All */}
-              <div className="flex items-center gap-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl px-6 py-4 min-w-[220px] border border-[#292929]">
-                <input
-                  type="checkbox"
-                  id="select-all"
-                  checked={selectedNFTs.length === paginatedNFTs.length && paginatedNFTs.length > 0}
-                  onChange={toggleSelectAll}
-                  className="h-6 w-6 rounded border-2 border-[#00ff00] bg-transparent text-[#00ff00] focus:ring-2 focus:ring-[#00ff00]/20"
-                />
-                <label htmlFor="select-all" className="text-white font-semibold text-lg cursor-pointer">
-                  Select All
-                </label>
-              </div>
-
-              {/* Selected Points */}
-              <div className="flex items-center gap-4 bg-gradient-to-r from-[#00ff00]/10 to-[#00ff00]/5 rounded-xl px-8 py-4 border border-[#00ff00]/20">
-                <span className="text-white font-semibold text-lg">Selected Points:</span>
-                <span className="text-white text-6xl font-black">{selectedPoints}</span>
-              </div>
-
-              {/* Recycle Button */}
-              <Button
-                className="bg-[#00ff00] text-white hover:bg-[#00dd00] px-10 py-6 text-xl font-black min-w-[240px] border-2 border-[#00ff00] transition-all duration-300 rounded-xl"
-                disabled={selectedNFTs.length === 0}
-                onClick={handleRecycleSelected}
-              >
-                <Recycle className="mr-3 h-8 w-8" />
-                Recycle
-              </Button>
+          <div className="flex items-center justify-between mb-6">
+            {/* Left Side - Select All */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="select-all"
+                checked={selectedNFTs.length === paginatedNFTs.length && paginatedNFTs.length > 0}
+                onChange={toggleSelectAll}
+                className="h-5 w-5 rounded border-2 border-[#00ff00] bg-transparent text-[#00ff00] focus:ring-2 focus:ring-[#00ff00]/20"
+              />
+              <label htmlFor="select-all" className="text-white font-semibold cursor-pointer">
+                Select All
+              </label>
             </div>
+
+            {/* Center - Selected Points */}
+            <div className="flex items-center gap-4">
+              <span className="text-gray-400 text-sm">Selected:</span>
+              <span className="text-white text-2xl font-bold">{selectedNFTs.length}</span>
+              <span className="text-gray-400 text-sm">NFTs</span>
+              <div className="w-px h-6 bg-gray-600"></div>
+              <span className="text-gray-400 text-sm">Points:</span>
+              <span className="text-white text-2xl font-bold">{selectedPoints}</span>
+            </div>
+
+            {/* Right Side - Recycle Button */}
+            <Button
+              className="relative bg-gradient-to-r from-[#00ff00] to-[#00dd00] text-black hover:from-[#00ff00] hover:to-[#00ff00] px-10 py-6 text-base font-black border-0 transition-all duration-500 rounded-xl shadow-[0_0_20px_rgba(0,255,0,0.4)] hover:shadow-[0_0_30px_rgba(0,255,0,0.6)] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-[0_0_10px_rgba(0,255,0,0.2)]"
+              disabled={selectedNFTs.length === 0}
+              onClick={handleRecycleSelected}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00ff00]/20 to-[#00dd00]/20 rounded-xl blur-sm"></div>
+              <div className="relative flex items-center gap-3">
+                <Recycle className="h-6 w-6" />
+                <span>Recycle Selected</span>
+                {selectedNFTs.length > 0 && (
+                  <div className="bg-black/20 rounded-full px-2 py-1 text-xs font-bold">
+                    {selectedNFTs.length}
+                  </div>
+                )}
+              </div>
+            </Button>
           </div>
 
           {/* NFT Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {paginatedNFTs.map((nft) => {
               const isSelected = selectedNFTs.includes(nft.mint)
               const isCurrentlyBurning = isBurning(nft.mint)
@@ -159,8 +170,10 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
               return (
                 <div
                   key={nft.mint}
-                  className={`relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-[#00ff00]/20 ${
-                    isSelected ? "ring-4 ring-[#00ff00] shadow-[#00ff00]/30" : "ring-2 ring-gray-600/50"
+                  className={`bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-xl border border-[#292929] overflow-hidden cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl ${
+                    isSelected
+                      ? "ring-2 ring-[#00ff00] ring-offset-1 ring-offset-[#0a0a0a] shadow-[0_0_24px_2px_rgba(0,255,0,0.15)]"
+                      : "hover:shadow-2xl hover:shadow-black/40"
                   } ${isCurrentlyBurned ? 'opacity-50' : 'hover:scale-105'}`}
                   onClick={() => !isCurrentlyBurned && !isCurrentlyBurning && handleSelectNFT(nft.mint)}
                 >
@@ -176,8 +189,8 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
                     {isCurrentlyBurning && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm">
                         <div className="text-center">
-                          <Loader2 className="h-16 w-16 animate-spin text-[#00ff00] mx-auto mb-4" />
-                          <div className="text-white font-bold text-lg">Recycling...</div>
+                          <Loader2 className="h-8 w-8 animate-spin text-[#00ff00] mx-auto mb-2" />
+                          <div className="text-white font-bold text-sm">Recycling...</div>
                         </div>
                       </div>
                     )}
@@ -186,8 +199,8 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
                     {isCurrentlyBurned && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm">
                         <div className="text-center">
-                          <Trash2 className="h-16 w-16 mx-auto mb-4 text-red-400" />
-                          <div className="text-red-400 font-bold text-lg">Burned</div>
+                          <Trash2 className="h-8 w-8 mx-auto mb-2 text-red-400" />
+                          <div className="text-red-400 font-bold text-sm">Burned</div>
                         </div>
                       </div>
                     )}
@@ -195,39 +208,31 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
                     {/* Recycle Icon Overlay for non-burned NFTs */}
                     {!isCurrentlyBurned && !isCurrentlyBurning && (
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300">
-                        <div className="bg-gradient-to-r from-[#00ff00] to-[#00dd00] rounded-full p-6 shadow-2xl shadow-[#00ff00]/50">
-                          <Recycle className="h-16 w-16 text-black" />
+                        <div className="bg-gradient-to-r from-[#00ff00] to-[#00dd00] rounded-full p-4 shadow-2xl shadow-[#00ff00]/50">
+                          <Recycle className="h-8 w-8 text-black" />
                         </div>
                       </div>
                     )}
-                  </div>
 
-                  {/* Checkbox at bottom */}
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                    <div
-                      className={`h-8 w-8 rounded-full border-4 flex items-center justify-center shadow-lg transition-all duration-300 ${
-                        isSelected ? "bg-[#00ff00] border-[#00ff00] shadow-[#00ff00]/50" : "bg-black/80 border-white backdrop-blur-sm"
-                      }`}
-                    >
-                      {isSelected && <div className="h-4 w-4 rounded-full bg-black" />}
+                    {/* Selection Indicator */}
+                    <div className="absolute top-3 right-3">
+                      <div
+                        className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                          isSelected
+                            ? "bg-[#00ff00] border-[#00ff00] shadow-[0_0_12px_rgba(0,255,0,0.6)]"
+                            : "bg-black/80 border-white backdrop-blur-sm shadow-lg"
+                        }`}
+                      >
+                        {isSelected && <div className="h-3 w-3 rounded-full bg-black" />}
+                      </div>
                     </div>
                   </div>
 
                   {/* NFT Name */}
-                  <div className="absolute top-3 left-3 right-3">
-                    <div className="bg-black/70 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20">
-                      <p className="text-white text-sm font-bold truncate">{nft.name}</p>
-                    </div>
+                  <div className="p-3">
+                    <p className="text-white text-sm font-semibold truncate">{nft.name}</p>
+                    <p className="text-gray-400 text-xs mt-1">NFT</p>
                   </div>
-
-                  {/* Selection Indicator */}
-                  {isSelected && (
-                    <div className="absolute top-3 right-3">
-                      <div className="w-6 h-6 bg-[#00ff00] rounded-full flex items-center justify-center shadow-lg">
-                        <div className="w-3 h-3 bg-black rounded-full"></div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )
             })}
@@ -235,29 +240,29 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
+            <div className="flex items-center justify-center gap-3 mt-6">
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
+                className="border-[#292929] text-white hover:bg-[#00ff00] hover:text-black bg-transparent px-4 py-2"
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft className="mr-2 h-4 w-4" />
+                <ChevronLeft className="mr-1 h-4 w-4" />
                 Previous
               </Button>
-              <span className="text-gray-400 px-4">
+              <span className="text-gray-400 px-3 text-sm">
                 Page {currentPage} of {totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
+                className="border-[#292929] text-white hover:bg-[#00ff00] hover:text-black bg-transparent px-4 py-2"
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
               >
                 Next
-                <ChevronRight className="ml-2 h-4 w-4" />
+                <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
           )}
