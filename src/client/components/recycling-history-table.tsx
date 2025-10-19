@@ -45,8 +45,17 @@ export function RecyclingHistoryTable() {
     new Date(b.date).getTime() - new Date(a.date).getTime()
   )
 
+  if (!publicKey) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold text-white mb-4">Connect Your Wallet</h2>
+        <p className="text-gray-400">Connect your wallet to view your recycling history</p>
+      </div>
+    )
+  }
+
   // If no recycled NFTs, show empty state
-  if (!publicKey || historyArray.length === 0) {
+  if (historyArray.length === 0) {
     return (
       <div className="mt-8">
         <div className="text-center mb-8">
@@ -55,14 +64,10 @@ export function RecyclingHistoryTable() {
         </div>
         <div className="border border-[#292929] rounded-lg overflow-hidden">
           <div className="p-8 text-center">
-            <p className="text-gray-400 mb-4">
-              {!publicKey ? 'Connect your wallet to view recycling history' : 'No NFTs recycled yet'}
+            <p className="text-gray-400 mb-4">No NFTs recycled yet</p>
+            <p className="text-sm text-gray-500">
+              Your recycling history will appear here once you start recycling NFTs
             </p>
-            {!publicKey && (
-              <p className="text-sm text-gray-500">
-                Your recycling history will appear here once you start recycling NFTs
-              </p>
-            )}
           </div>
         </div>
       </div>

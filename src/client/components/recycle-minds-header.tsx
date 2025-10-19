@@ -41,9 +41,6 @@ export function RecycleMindsHeader() {
 
         <div className="flex items-center gap-3">
           <WalletButton />
-          <Button variant="ghost" size="icon" className="rounded-full border border-[#292929]">
-            <Globe className="h-5 w-5" />
-          </Button>
         </div>
       </div>
     </header>

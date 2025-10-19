@@ -18,10 +18,10 @@ export default function Page() {
   const [selectedCollection, setSelectedCollection] = useState<string | undefined>(undefined)
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
       <RecycleMindsHeader />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8">
         {activeTab !== "why-recycle" && <StatsCards />}
         <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
         {activeTab === "digital-recycler" ? (

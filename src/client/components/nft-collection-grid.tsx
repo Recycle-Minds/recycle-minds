@@ -72,7 +72,7 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
   if (!isConnected) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-[#00ff00] mb-4">Connect Your Wallet</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">Connect Your Wallet</h2>
         <p className="text-gray-400">Connect your wallet to view your NFT collections</p>
       </div>
     )

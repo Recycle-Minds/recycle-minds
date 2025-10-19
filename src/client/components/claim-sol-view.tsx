@@ -70,15 +70,9 @@ export function ClaimSolView() {
 
   if (!connected) {
     return (
-      <div className="mt-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white mb-2">Claim your SOL</h2>
-          <p className="text-gray-400">Clean up empty token accounts and recover SOL rent</p>
-        </div>
-        <div className="text-center py-12">
-          <h3 className="text-xl font-bold text-gray-300 mb-2">Connect Your Wallet</h3>
-          <p className="text-gray-500">Connect your wallet to view accounts available for cleanup</p>
-        </div>
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold text-white mb-4">Connect Your Wallet</h2>
+        <p className="text-gray-400">Connect your wallet to view accounts available for cleanup</p>
       </div>
     )
   }
@@ -210,7 +204,7 @@ export function ClaimSolView() {
               )}
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
             {emptyAccounts.map((account) => {
               const checked = !!selected[account.address]
               return (
