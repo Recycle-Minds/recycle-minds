@@ -28,9 +28,6 @@ export function RecycleMindsFooter() {
               <Youtube className="h-6 w-6" />
             </a>
             <a href="#" className="text-[#999999] hover:text-white transition-colors">
-              <Linkedin className="h-6 w-6" />
-            </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
               <Send className="h-6 w-6" />
             </a>
           </div>

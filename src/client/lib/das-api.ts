@@ -219,6 +219,41 @@ export async function getAsset(rpcUrl: string, assetId: string): Promise<DasAsse
   }
 }
 
+export async function getAssetsByIds(rpcUrl: string, assetIds: string[]): Promise<DasAsset[]> {
+  try {
+    const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY || 'demo-key'
+    const solanaUrl = `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
+
+    const response = await fetch(solanaUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'my-id',
+        method: 'getAssets',
+        params: {
+          ids: assetIds
+        }
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    if (data.error) {
+      throw new Error(`RPC error: ${data.error.message}`)
+    }
+    return data.result?.items || []
+  } catch (error) {
+    console.error('Error fetching assets by ids:', error)
+    throw error
+  }
+}
+
 export async function getAssetsByGroup(
   rpcUrl: string,
   groupKey: string,

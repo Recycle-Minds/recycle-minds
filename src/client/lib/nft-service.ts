@@ -1,4 +1,22 @@
-import { Connection, PublicKey } from '@solana/web3.js'
+import { Connection, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
+import {
+  getAssociatedTokenAddress,
+  createBurnInstruction,
+  createCloseAccountInstruction,
+  TOKEN_PROGRAM_ID
+} from '@solana/spl-token'
+import {
+  PROGRAM_ID as TMETA_PROGRAM_ID,
+  findMetadataPda,
+  findMasterEditionPda,
+  findTokenRecordPda,
+  createBurnV1Instruction,
+} from '@metaplex-foundation/mpl-token-metadata'
+import {
+  PROGRAM_ID as CORE_PROGRAM_ID,
+  createRemoveCollectionV1Instruction as coreCreateRemoveCollectionV1Instruction,
+  createBurnV1Instruction as coreCreateBurnV1Instruction,
+} from '@metaplex-foundation/mpl-core'
 import { getAssetsByOwner, getAsset, DasAsset } from './das-api'
 import { StatsService, RecycledNFT } from './stats-service'
 
@@ -284,6 +302,132 @@ export class NFTService {
     }
   }
 
+  // Build a burn + close transaction for classic SPL NFTs (supply 1, decimals 0)
+  async buildBurnTransaction(mintAddress: string, owner: PublicKey): Promise<Transaction> {
+    this.log('Building burn transaction for:', mintAddress)
+    const mint = new PublicKey(mintAddress)
+
+    // Derive ATA
+    const ata = await getAssociatedTokenAddress(mint, owner, true)
+
+    // Burn 1 token and close account to owner
+    const burnIx = createBurnInstruction(
+      ata,
+      mint,
+      owner,
+      1,
+      [],
+      TOKEN_PROGRAM_ID
+    )
+
+    const closeIx = createCloseAccountInstruction(
+      ata,
+      owner,      // destination (receive rent)
+      owner,      // owner/authority
+      [],
+      TOKEN_PROGRAM_ID
+    )
+
+    const tx = new Transaction()
+    tx.add(burnIx, closeIx)
+    return tx
+  }
+
+  // Build a burn for Programmable NFTs (pNFT) using Token Metadata burnV1
+  async buildProgrammableBurnTransaction(mintAddress: string, owner: PublicKey): Promise<Transaction> {
+    this.log('Building pNFT burn transaction for:', mintAddress)
+    const mint = new PublicKey(mintAddress)
+    const token = await getAssociatedTokenAddress(mint, owner, true)
+    const metadata = findMetadataPda(mint)
+    const edition = findMasterEditionPda(mint)
+    const tokenRecord = findTokenRecordPda(mint, token)
+
+    const accounts = {
+      metadata,
+      edition,
+      mint,
+      token,
+      authority: owner,
+      splTokenProgram: TOKEN_PROGRAM_ID,
+      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+      tokenRecord,
+      // ruleSet and auth rules accounts are optional here; if the asset has a rule set, the program will enforce it
+    }
+
+    const ix = createBurnV1Instruction(accounts)
+    const closeIx = createCloseAccountInstruction(token, owner, owner, [], TOKEN_PROGRAM_ID)
+    const tx = new Transaction()
+    tx.add(ix, closeIx)
+    return tx
+  }
+
+  async buildBurnTransactionAuto(nft: NFTAccount, owner: PublicKey): Promise<Transaction> {
+    if (nft.interface === 'V1_NFT') return this.buildBurnTransaction(nft.mint, owner)
+    if (nft.interface === 'ProgrammableNFT') return this.buildProgrammableBurnTransaction(nft.mint, owner)
+    if (nft.interface === 'MplCoreAsset') {
+      // For Core assets, use the Core burn instruction (asset id == mint here via DAS id)
+      const assetId = new PublicKey(nft.mint)
+      const ix = coreCreateBurnV1Instruction({
+        asset: assetId,
+        authority: owner,
+      })
+      const tx = new Transaction().add(ix)
+      return tx
+    }
+    if (nft.interface === 'MplCoreCollection') {
+      // Removing a collection is different; skip by default to avoid footguns
+      throw new Error('Burning Core collections is not supported in client-only flow')
+    }
+    throw new Error(`Unsupported burn interface: ${nft.interface}`)
+  }
+
+  // Build a cleanup transaction that closes up to `limit` empty token accounts
+  async buildCleanupTransaction(owner: PublicKey, limit: number = 10): Promise<{ tx: Transaction; closedAccounts: PublicKey[] }> {
+    this.log('Building cleanup transaction for owner:', owner.toString())
+    const parsed = await this.connection.getParsedTokenAccountsByOwner(owner, { programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') })
+
+    const emptyAccounts = parsed.value
+      .filter((acc) => {
+        try {
+          const info: any = acc.account.data.parsed.info
+          const amount = info.tokenAmount?.uiAmount || 0
+          return amount === 0
+        } catch {
+          return false
+        }
+      })
+      .slice(0, limit)
+
+    const tx = new Transaction()
+    const closed: PublicKey[] = []
+
+    for (const acc of emptyAccounts) {
+      tx.add(createCloseAccountInstruction(
+        acc.pubkey,
+        owner,
+        owner,
+        [],
+        TOKEN_PROGRAM_ID
+      ))
+      closed.push(acc.pubkey)
+    }
+
+    this.log('Prepared close instructions for accounts:', closed.length)
+    return { tx, closedAccounts: closed }
+  }
+
+  // Build cleanup tx for an explicit list of token account pubkeys
+  async buildCleanupTransactionForAccounts(owner: PublicKey, accounts: PublicKey[]): Promise<{ tx: Transaction; closedAccounts: PublicKey[] }> {
+    this.log('Building targeted cleanup transaction for', accounts.length, 'accounts')
+    const tx = new Transaction()
+    const closed: PublicKey[] = []
+    for (const acc of accounts) {
+      tx.add(createCloseAccountInstruction(acc, owner, owner, [], TOKEN_PROGRAM_ID))
+      closed.push(acc)
+    }
+    return { tx, closedAccounts: closed }
+  }
+
   async burnNFT(mintAddress: string, owner: PublicKey): Promise<boolean> {
     try {
       this.log('Burning NFT:', mintAddress, 'for owner:', owner.toString())
@@ -304,16 +448,9 @@ export class NFTService {
         throw new Error('Asset is not owned by the user')
       }
 
-      // In a real implementation, you would:
-      // 1. Create a transaction to close the token account
-      // 2. This would recover the rent (about 0.00203928 SOL)
-      // 3. Send the transaction to the network
-      
-      // For now, we'll simulate the burn process
-      // The actual implementation would use @solana/spl-token to create the close account instruction
-      
-      this.log('Simulating NFT burn - in production this would close the token account and recover rent')
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Build tx (client will sign and send)
+      const _tx = await this.buildBurnTransaction(mintAddress, owner)
+      // Note: sending happens in the hook using wallet adapter
       
       // Calculate stats for the recycled NFT
       const nftValue = 0.1 // Estimated NFT value for points calculation

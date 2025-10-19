@@ -1,121 +1,231 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Layers3 } from "lucide-react"
+import { Layers3, Loader2 } from "lucide-react"
+import { useRecycling } from "@/hooks/use-recycling"
+import { useWallet } from '@solana/wallet-adapter-react'
+import { useConnection } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
 
-const nftCollections = [
-  { id: 1, name: "Collection Name", network: "Solana", ownedNFTs: 50 },
-  { id: 2, name: "Collection Name", network: "Solana", ownedNFTs: 2 },
-  { id: 3, name: "Collection Name", network: "Solana", ownedNFTs: 12 },
-  { id: 4, name: "Collection Name", network: "Solana", ownedNFTs: 6 },
-]
-
-const tokenCollections = [
-  { id: 1, name: "Token Name", network: "Solana", amount: "1,234.56" },
-  { id: 2, name: "Token Name", network: "Solana", amount: "789.12" },
-  { id: 3, name: "Token Name", network: "Solana", amount: "456.78" },
-]
+interface EmptyAccount {
+  address: string
+  mint: string
+  amount: number
+  rent: number
+}
 
 export function ClaimSolView() {
   const [activeSubTab, setActiveSubTab] = useState<"nfts" | "tokens">("nfts")
+  const { cleanupClaim, cleanupClaimSelected } = useRecycling()
+  const { publicKey, connected } = useWallet()
+  const { connection } = useConnection()
+  const [claiming, setClaiming] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [emptyAccounts, setEmptyAccounts] = useState<EmptyAccount[]>([])
+  const [lastResult, setLastResult] = useState<{ signature: string | null; closed: number } | null>(null)
+  const [selected, setSelected] = useState<Record<string, boolean>>({})
+
+  const fetchEmptyAccounts = async () => {
+    if (!connected || !publicKey) return
+
+    setLoading(true)
+    try {
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+        programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
+      })
+
+      const empty: EmptyAccount[] = tokenAccounts.value
+        .filter((acc) => {
+          try {
+            const info: any = acc.account.data.parsed.info
+            const amount = info.tokenAmount?.uiAmount || 0
+            return amount === 0
+          } catch {
+            return false
+          }
+        })
+        .map(acc => ({
+          address: acc.pubkey.toString(),
+          mint: acc.account.data.parsed.info.mint,
+          amount: 0,
+          rent: 0.00203928 // Typical rent for token account
+        }))
+
+      setEmptyAccounts([...empty])
+    } catch (error) {
+      console.error('Error fetching empty accounts:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (connected && publicKey) {
+      fetchEmptyAccounts()
+    }
+  }, [connected, publicKey, connection])
+
+  const totalRent = emptyAccounts.reduce((sum, acc) => sum + acc.rent, 0)
+
+  if (!connected) {
+    return (
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-center mb-6 text-[#00ff00]">CLAIM YOUR SOL</h2>
+        <div className="text-center py-12">
+          <h3 className="text-xl font-bold text-gray-300 mb-2">Connect Your Wallet</h3>
+          <p className="text-gray-500">Connect your wallet to view accounts available for cleanup</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-bold text-center mb-6 text-[#00ff00]">CLAIM YOUR SOL</h2>
 
-      {/* Sub-tabs */}
-      <div className="flex gap-0 mb-8">
+      {/* Summary Card */}
+      <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-xl p-6 shadow-lg shadow-black/30 border border-[#292929] mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-2">Empty Token Accounts</h3>
+            <p className="text-gray-400">Close empty accounts to recover rent</p>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-white">{emptyAccounts.length}</div>
+            <div className="text-sm text-gray-400">accounts</div>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400">Estimated SOL to recover:</span>
+            <span className="text-xl font-bold text-white">{totalRent.toFixed(6)} SOL</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-4 mb-6">
         <Button
-          className={
-            activeSubTab === "nfts"
-              ? "flex-1 bg-[#00ff00] text-black hover:bg-[#00dd00] rounded-r-none h-14 text-lg font-semibold"
-              : "flex-1 bg-transparent border border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00]/10 rounded-r-none h-14 text-lg font-semibold"
-          }
-          onClick={() => setActiveSubTab("nfts")}
+          className="bg-[#00ff00] text-black hover:bg-[#00dd00] px-8 py-3 text-lg font-bold border-2 border-[#00ff00] transition-all duration-300 rounded-lg shadow-[0_0_20px_rgba(0,255,0,0.4)] hover:shadow-[0_0_30px_rgba(0,255,0,0.6)] hover:scale-105"
+          disabled={emptyAccounts.length === 0 || claiming}
+          onClick={async () => {
+            try {
+              setClaiming(true)
+              const res = await cleanupClaim(emptyAccounts.length)
+              setLastResult(res)
+              if (res.signature) {
+                await fetchEmptyAccounts() // Refresh the list
+              }
+            } finally {
+              setClaiming(false)
+            }
+          }}
         >
-          NFTs
+          {claiming ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Claiming...
+            </>
+          ) : (
+            `Claim All (${emptyAccounts.length} accounts)`
+          )}
         </Button>
+        
         <Button
-          className={
-            activeSubTab === "tokens"
-              ? "flex-1 bg-[#00ff00] text-black hover:bg-[#00dd00] rounded-l-none h-14 text-lg font-semibold"
-              : "flex-1 bg-transparent border border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00]/10 rounded-l-none h-14 text-lg font-semibold"
-          }
-          onClick={() => setActiveSubTab("tokens")}
+          variant="outline"
+          className="border-[#292929] text-white hover:bg-gray-800 px-6 py-3"
+          onClick={fetchEmptyAccounts}
+          disabled={loading}
         >
-          Tokens
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Refreshing...
+            </>
+          ) : (
+            'Refresh'
+          )}
+        </Button>
+
+        <Button
+          className="bg-[#00ff00] text-black hover:bg-[#00dd00] px-6 py-3 text-lg font-bold border-2 border-[#00ff00] transition-all duration-300 rounded-lg"
+          disabled={Object.keys(selected).filter(k => selected[k]).length === 0 || claiming}
+          onClick={async () => {
+            try {
+              setClaiming(true)
+              const toClose = Object.keys(selected).filter(k => selected[k])
+              const res = await cleanupClaimSelected(toClose)
+              setLastResult(res)
+              if (res.signature) await fetchEmptyAccounts()
+            } finally {
+              setClaiming(false)
+            }
+          }}
+        >
+          {claiming ? 'Claiming…' : `Claim Selected (${Object.keys(selected).filter(k => selected[k]).length})`}
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[#292929]">
-              <th className="text-left py-4 px-4 text-[#00ff00] font-semibold">Collection</th>
-              <th className="text-left py-4 px-4 text-[#00ff00] font-semibold">Network</th>
-              <th className="text-left py-4 px-4 text-[#00ff00] font-semibold">
-                {activeSubTab === "nfts" ? "Owned NFTs" : "Amount"}
-              </th>
-              <th className="text-left py-4 px-4 text-[#00ff00] font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {activeSubTab === "nfts"
-              ? nftCollections.map((collection) => (
-                  <tr key={collection.id} className="border-b border-[#292929] hover:bg-gray-900/30">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white" />
-                        <span>{collection.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Layers3 className="w-5 h-5 text-purple-400" />
-                        <span>{collection.network}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">{collection.ownedNFTs}</td>
-                    <td className="py-4 px-4">
-                      <Button
-                        variant="outline"
-                        className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
-                      >
-                        Claim
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              : tokenCollections.map((token) => (
-                  <tr key={token.id} className="border-b border-[#292929] hover:bg-gray-900/30">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white" />
-                        <span>{token.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Layers3 className="w-5 h-5 text-purple-400" />
-                        <span>{token.network}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">{token.amount}</td>
-                    <td className="py-4 px-4">
-                      <Button
-                        variant="outline"
-                        className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
-                      >
-                        Claim
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Results */}
+      {lastResult && (
+        <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-xl p-4 shadow-lg shadow-black/30 border border-[#292929] mb-6">
+          <h4 className="text-lg font-semibold text-white mb-2">Last Claim Result</h4>
+          <p className="text-gray-400">
+            {lastResult.signature ? (
+              <>
+                Successfully closed {lastResult.closed} accounts
+                <br />
+                <span className="text-xs text-gray-500">Tx: {lastResult.signature}</span>
+              </>
+            ) : (
+              'No accounts found to close'
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* Empty Accounts List */}
+      {loading ? (
+        <div className="text-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#00ff00]" />
+          <p className="text-gray-400">Loading empty accounts...</p>
+        </div>
+      ) : emptyAccounts.length === 0 ? (
+        <div className="text-center py-12">
+          <h3 className="text-xl font-bold text-gray-300 mb-2">No Empty Accounts Found</h3>
+          <p className="text-gray-500">All your token accounts have balances or there are no accounts to clean up</p>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-xl p-6 shadow-lg shadow-black/30 border border-[#292929]">
+          <h3 className="text-lg font-semibold text-white mb-4">Empty Token Accounts ({emptyAccounts.length})</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+            {emptyAccounts.map((account) => {
+              const checked = !!selected[account.address]
+              return (
+                <label key={account.address} className={`flex items-center gap-3 p-3 rounded-xl border ${checked ? 'border-[#00ff00] bg-[#00ff00]/5' : 'border-[#292929]'} cursor-pointer`}>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-[#00ff00]"
+                    checked={checked}
+                    onChange={() => setSelected(prev => ({ ...prev, [account.address]: !prev[account.address] }))}
+                  />
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="flex-1">
+                      <div className="text-sm font-mono text-gray-300">Account: {account.address.slice(0, 8)}...{account.address.slice(-8)}</div>
+                      <div className="text-xs text-gray-500">Mint: {account.mint.slice(0, 8)}...{account.mint.slice(-8)}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-[#00ff00]">{account.rent.toFixed(6)} SOL</div>
+                      <div className="text-xs text-gray-500">rent</div>
+                    </div>
+                  </div>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
