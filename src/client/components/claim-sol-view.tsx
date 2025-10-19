@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Layers3, Loader2, RefreshCw } from "lucide-react"
+import { Layers3, Loader2, RefreshCw, Copy, Check } from "lucide-react"
 import { useRecycling } from "@/hooks/use-recycling"
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useConnection } from '@solana/wallet-adapter-react'
@@ -25,6 +25,7 @@ export function ClaimSolView() {
   const [emptyAccounts, setEmptyAccounts] = useState<EmptyAccount[]>([])
   const [lastResult, setLastResult] = useState<{ signature: string | null; closed: number } | null>(null)
   const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null)
 
   const fetchEmptyAccounts = async () => {
     if (!connected || !publicKey) return
@@ -67,6 +68,16 @@ export function ClaimSolView() {
   }, [connected, publicKey, connection])
 
   const totalRent = emptyAccounts.reduce((sum, acc) => sum + acc.rent, 0)
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedAddress(text)
+      setTimeout(() => setCopiedAddress(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
 
   if (!connected) {
     return (
@@ -204,7 +215,7 @@ export function ClaimSolView() {
               )}
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
             {emptyAccounts.map((account) => {
               const checked = !!selected[account.address]
               return (
@@ -217,8 +228,40 @@ export function ClaimSolView() {
                   />
                   <div className="flex items-center gap-3 flex-1">
                     <div className="flex-1">
-                      <div className="text-sm font-mono text-gray-300">Account: {account.address.slice(0, 8)}...{account.address.slice(-8)}</div>
-                      <div className="text-xs text-gray-500">Mint: {account.mint.slice(0, 8)}...{account.mint.slice(-8)}</div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm text-gray-400">Account:</span>
+                        <span className="text-sm font-mono text-gray-300">{account.address}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            copyToClipboard(account.address)
+                          }}
+                          className="p-1 hover:bg-gray-700 rounded transition-colors"
+                        >
+                          {copiedAddress === account.address ? (
+                            <Check className="h-3 w-3 text-[#00ff00]" />
+                          ) : (
+                            <Copy className="h-3 w-3 text-gray-400" />
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400">Mint:</span>
+                        <span className="text-sm font-mono text-gray-300">{account.mint}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            copyToClipboard(account.mint)
+                          }}
+                          className="p-1 hover:bg-gray-700 rounded transition-colors"
+                        >
+                          {copiedAddress === account.mint ? (
+                            <Check className="h-3 w-3 text-[#00ff00]" />
+                          ) : (
+                            <Copy className="h-3 w-3 text-gray-400" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-bold text-[#00ff00]">{account.rent.toFixed(6)} SOL</div>
