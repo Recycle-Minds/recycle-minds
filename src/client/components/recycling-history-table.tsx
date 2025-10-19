@@ -50,7 +50,7 @@ export function RecyclingHistoryTable() {
     return (
       <div className="mt-8">
         <h2 className="text-2xl font-bold text-[#00ff00] text-center mb-6">HISTORY</h2>
-        <div className="border border-gray-800 rounded-lg overflow-hidden">
+        <div className="border border-[#292929] rounded-lg overflow-hidden">
           <div className="p-8 text-center">
             <p className="text-gray-400 mb-4">
               {!publicKey ? 'Connect your wallet to view recycling history' : 'No NFTs recycled yet'}
@@ -124,10 +124,10 @@ export function RecyclingHistoryTable() {
     <div className="mt-8">
       <h2 className="text-2xl font-bold text-[#00ff00] text-center mb-6">HISTORY</h2>
 
-      <div className="border border-gray-800 rounded-lg overflow-hidden">
+      <div className="border border-[#292929] rounded-lg overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-[#292929]">
               <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Collection</th>
               <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Network</th>
               <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Date</th>
@@ -137,7 +137,7 @@ export function RecyclingHistoryTable() {
           </thead>
           <tbody>
             {historyArray.map((item, index) => (
-              <tr key={index} className="border-b border-gray-800 last:border-b-0 hover:bg-gray-900/50">
+              <tr key={index} className="border-b border-[#292929] last:border-b-0 hover:bg-gray-900/50">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <img 

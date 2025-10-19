@@ -4,7 +4,7 @@ import { Globe } from "lucide-react"
 
 export function RecycleMindsHeader() {
   return (
-    <header className="border-b border-gray-800 bg-[#0a0a0a]">
+    <header className="border-b border-[#292929] bg-[#0a0a0a]">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center">
@@ -41,7 +41,7 @@ export function RecycleMindsHeader() {
 
         <div className="flex items-center gap-3">
           <WalletButton />
-          <Button variant="ghost" size="icon" className="rounded-full border border-gray-700">
+          <Button variant="ghost" size="icon" className="rounded-full border border-[#292929]">
             <Globe className="h-5 w-5" />
           </Button>
         </div>

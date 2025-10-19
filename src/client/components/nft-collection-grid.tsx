@@ -115,7 +115,7 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
           {/* Control Bar */}
           <div className="flex items-center justify-between mb-8 gap-4">
             {/* Select All */}
-            <div className="flex items-center gap-3 bg-[#1a1a1a] border border-gray-800 rounded-lg px-6 py-4 min-w-[200px]">
+            <div className="flex items-center gap-3 bg-[#1a1a1a] border border-[#292929] rounded-lg px-6 py-4 min-w-[200px]">
               <input
                 type="checkbox"
                 id="select-all"

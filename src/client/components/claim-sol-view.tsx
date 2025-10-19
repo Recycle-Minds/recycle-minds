@@ -52,7 +52,7 @@ export function ClaimSolView() {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-[#292929]">
               <th className="text-left py-4 px-4 text-[#00ff00] font-semibold">Collection</th>
               <th className="text-left py-4 px-4 text-[#00ff00] font-semibold">Network</th>
               <th className="text-left py-4 px-4 text-[#00ff00] font-semibold">
@@ -64,7 +64,7 @@ export function ClaimSolView() {
           <tbody>
             {activeSubTab === "nfts"
               ? nftCollections.map((collection) => (
-                  <tr key={collection.id} className="border-b border-gray-800/50 hover:bg-gray-900/30">
+                  <tr key={collection.id} className="border-b border-[#292929] hover:bg-gray-900/30">
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-white" />
@@ -89,7 +89,7 @@ export function ClaimSolView() {
                   </tr>
                 ))
               : tokenCollections.map((token) => (
-                  <tr key={token.id} className="border-b border-gray-800/50 hover:bg-gray-900/30">
+                  <tr key={token.id} className="border-b border-[#292929] hover:bg-gray-900/30">
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-white" />

@@ -74,18 +74,11 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <Input
             placeholder="Search by Collection or Contract"
-            className="pl-10 bg-[#1a1a1a] border-gray-800/30 text-white placeholder:text-gray-500"
+            className="pl-10 bg-[#1a1a1a] border-[#292929] text-white placeholder:text-gray-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button
-          variant="outline"
-          className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black min-w-[150px] justify-between bg-transparent"
-        >
-          Solana
-          <ChevronDown className="ml-2 h-4 w-4" />
-        </Button>
       </div>
 
       <div className="text-center mb-6">
@@ -104,7 +97,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-[#292929]">
                 <th className="text-left py-4 px-4 text-[#00ff00] font-medium">Collection</th>
                 <th className="text-left py-4 px-4 text-[#00ff00] font-medium">Network</th>
                 <th className="text-left py-4 px-4 text-[#00ff00] font-medium">Owned NFTs</th>
@@ -113,7 +106,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
             </thead>
             <tbody>
               {filteredCollections.map((collection) => (
-                <tr key={collection.mint} className="border-b border-gray-800 hover:bg-[#1a1a1a] transition-colors">
+                <tr key={collection.mint} className="border-b border-[#292929] hover:bg-[#1a1a1a] transition-colors">
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center">

@@ -17,7 +17,7 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
   return (
     <div className="relative mb-8">
       {/* Tab Container with Background */}
-      <div className="relative bg-[#0f0f0f] rounded-2xl p-2 border border-gray-800/30 backdrop-blur-sm">
+      <div className="relative bg-[#0f0f0f] rounded-2xl p-2 border border-[#292929] backdrop-blur-sm">
         {/* Active Tab Background */}
         <div 
           className="absolute top-2 bottom-2 bg-gradient-to-r from-[#00ff00]/20 to-[#00ff00]/10 rounded-xl transition-all duration-500 ease-out"
