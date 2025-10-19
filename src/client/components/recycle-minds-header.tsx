@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
-import { Globe, Wallet } from "lucide-react"
+import { WalletButton } from "@/components/wallet-button"
+import { Globe } from "lucide-react"
 
 export function RecycleMindsHeader() {
   return (
@@ -39,10 +40,7 @@ export function RecycleMindsHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button className="bg-[#00ff00] text-black hover:bg-[#00dd00] font-medium">
-            <Wallet className="mr-2 h-4 w-4" />
-            Connector Carteira
-          </Button>
+          <WalletButton />
           <Button variant="ghost" size="icon" className="rounded-full border border-gray-700">
             <Globe className="h-5 w-5" />
           </Button>

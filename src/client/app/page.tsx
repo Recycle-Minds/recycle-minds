@@ -15,6 +15,7 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState<
     "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle"
   >("digital-recycler")
+  const [selectedCollection, setSelectedCollection] = useState<string | undefined>(undefined)
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -24,9 +25,12 @@ export default function Page() {
         {activeTab !== "why-recycle" && <StatsCards />}
         <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
         {activeTab === "digital-recycler" ? (
-          <NFTRecycleTable />
+          <NFTRecycleTable onViewCollection={(collectionAddress) => {
+            setSelectedCollection(collectionAddress)
+            setActiveTab("view-collection")
+          }} />
         ) : activeTab === "view-collection" ? (
-          <NFTCollectionGrid />
+          <NFTCollectionGrid collectionAddress={selectedCollection} />
         ) : activeTab === "recycling-history" ? (
           <RecyclingHistoryTable />
         ) : activeTab === "claim-sol" ? (
