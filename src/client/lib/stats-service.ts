@@ -51,6 +51,12 @@ export class StatsService {
     }
   }
 
+  // Calculate recoverable SOL from empty token accounts
+  static calculateRecoverableSOL(emptyAccountsCount: number): number {
+    const rentPerAccount = 0.00203928 // Typical rent for token account
+    return emptyAccountsCount * rentPerAccount
+  }
+
   // Update user stats
   static updateUserStats(walletAddress: string, updates: Partial<UserStats>): UserStats {
     const currentStats = this.getUserStats(walletAddress)

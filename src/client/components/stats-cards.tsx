@@ -4,10 +4,46 @@ import { Card } from "@/components/ui/card"
 import { Layers, Battery, Trophy, Leaf } from "lucide-react"
 import { useStats } from "@/hooks/use-stats"
 import { useWallet } from '@solana/wallet-adapter-react'
+import { useConnection } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
+import { useState, useEffect } from 'react'
+import { StatsService } from '@/lib/stats-service'
 
 export function StatsCards() {
   const { publicKey } = useWallet()
+  const { connection } = useConnection()
   const { userStats, globalStats } = useStats()
+  const [recoverableSOL, setRecoverableSOL] = useState(0)
+
+  useEffect(() => {
+    const fetchRecoverableSOL = async () => {
+      if (!publicKey || !connection) return
+
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+          programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
+        })
+
+        const emptyAccountsCount = tokenAccounts.value.filter((acc) => {
+          try {
+            const info: any = acc.account.data.parsed.info
+            const amount = info.tokenAmount?.uiAmount || 0
+            return amount === 0
+          } catch {
+            return false
+          }
+        }).length
+
+        const recoverable = StatsService.calculateRecoverableSOL(emptyAccountsCount)
+        setRecoverableSOL(recoverable)
+      } catch (error) {
+        console.error('Error fetching recoverable SOL:', error)
+        setRecoverableSOL(0)
+      }
+    }
+
+    fetchRecoverableSOL()
+  }, [publicKey, connection])
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -64,10 +100,10 @@ export function StatsCards() {
           <span className="text-gray-300 text-sm font-medium">SOL to Claim</span>
         </div>
         <div className="text-3xl font-bold text-teal-400 mb-1">
-          {publicKey ? userStats.solClaimed.toFixed(3) : '0.000'}
+          {publicKey ? recoverableSOL.toFixed(6) : '0.000000'}
         </div>
         <div className="text-xs text-gray-300">
-          {publicKey ? 'Rent recovered' : 'Connect wallet to see SOL'}
+          {publicKey ? 'Available to claim' : 'Connect wallet to see SOL'}
         </div>
       </Card>
     </div>

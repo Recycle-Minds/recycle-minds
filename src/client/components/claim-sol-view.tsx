@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Layers3, Loader2 } from "lucide-react"
+import { Layers3, Loader2, RefreshCw } from "lucide-react"
 import { useRecycling } from "@/hooks/use-recycling"
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useConnection } from '@solana/wallet-adapter-react'
@@ -71,7 +71,10 @@ export function ClaimSolView() {
   if (!connected) {
     return (
       <div className="mt-8">
-        <h2 className="text-2xl font-bold text-center mb-6 text-[#00ff00]">CLAIM YOUR SOL</h2>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2">Claim your SOL</h2>
+          <p className="text-gray-400">Clean up empty token accounts and recover SOL rent</p>
+        </div>
         <div className="text-center py-12">
           <h3 className="text-xl font-bold text-gray-300 mb-2">Connect Your Wallet</h3>
           <p className="text-gray-500">Connect your wallet to view accounts available for cleanup</p>
@@ -82,7 +85,10 @@ export function ClaimSolView() {
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-bold text-center mb-6 text-[#00ff00]">CLAIM YOUR SOL</h2>
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Claim your SOL</h2>
+        <p className="text-gray-400">Clean up empty token accounts and recover SOL rent</p>
+      </div>
 
       {/* Summary Card */}
       <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-xl p-6 shadow-lg shadow-black/30 border border-[#292929] mb-6">
@@ -132,21 +138,6 @@ export function ClaimSolView() {
           )}
         </Button>
         
-        <Button
-          variant="outline"
-          className="border-[#292929] text-white hover:bg-gray-800 px-6 py-3"
-          onClick={fetchEmptyAccounts}
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Refreshing...
-            </>
-          ) : (
-            'Refresh'
-          )}
-        </Button>
 
         <Button
           className="bg-[#00ff00] text-black hover:bg-[#00dd00] px-6 py-3 text-lg font-bold border-2 border-[#00ff00] transition-all duration-300 rounded-lg"
@@ -198,7 +189,27 @@ export function ClaimSolView() {
         </div>
       ) : (
         <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-xl p-6 shadow-lg shadow-black/30 border border-[#292929]">
-          <h3 className="text-lg font-semibold text-white mb-4">Empty Token Accounts ({emptyAccounts.length})</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Empty Token Accounts ({emptyAccounts.length})</h3>
+            <Button
+              variant="outline"
+              className="border-[#292929] text-white hover:bg-gray-800 px-4 py-2 text-sm"
+              onClick={fetchEmptyAccounts}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Refreshing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
+                </>
+              )}
+            </Button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
             {emptyAccounts.map((account) => {
               const checked = !!selected[account.address]
