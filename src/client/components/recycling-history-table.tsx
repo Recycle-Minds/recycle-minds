@@ -122,43 +122,67 @@ export function RecyclingHistoryTable() {
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-bold text-[#00ff00] text-center mb-6">HISTORY</h2>
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Recycling History</h2>
+        <p className="text-gray-400">Track your environmental impact and earned rewards</p>
+      </div>
 
-      <div className="border border-[#292929] rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[#292929]">
-              <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Collection</th>
-              <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Network</th>
-              <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Date</th>
-              <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Number of NFTs</th>
-              <th className="text-left py-4 px-6 text-[#00ff00] font-semibold">Points Earned</th>
-            </tr>
-          </thead>
-          <tbody>
-            {historyArray.map((item, index) => (
-              <tr key={index} className="border-b border-[#292929] last:border-b-0 hover:bg-gray-900/50">
-                <td className="py-4 px-6">
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={item.image} 
-                      alt={item.collection}
-                      className="w-10 h-10 rounded-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.jpg'
-                      }}
-                    />
-                    <span className="text-white">{item.collection}</span>
-                  </div>
-                </td>
-                <td className="py-4 px-6">{getNetworkIcon(item.network)}</td>
-                <td className="py-4 px-6 text-white">{item.date}</td>
-                <td className="py-4 px-6 text-white">{item.nftCount}</td>
-                <td className="py-4 px-6 text-white">{item.points}</td>
+      <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-6 shadow-2xl shadow-black/50 border border-[#292929] backdrop-blur-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#292929]">
+                <th className="text-left py-3 px-6 text-white font-semibold text-base">Collection</th>
+                <th className="text-left py-3 px-6 text-white font-semibold text-base">Network</th>
+                <th className="text-left py-3 px-6 text-white font-semibold text-base">Date</th>
+                <th className="text-left py-3 px-6 text-white font-semibold text-base">NFTs Recycled</th>
+                <th className="text-left py-3 px-6 text-white font-semibold text-base">Points Earned</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {historyArray.map((item, index) => (
+                <tr key={index} className="border-b border-[#292929] last:border-b-0 hover:bg-gradient-to-r hover:from-[#00ff00]/5 hover:to-transparent transition-all duration-300 group">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <img 
+                          src={item.image} 
+                          alt={item.collection}
+                          className="w-10 h-10 rounded-xl object-cover shadow-lg"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.jpg'
+                          }}
+                        />
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-black"></div>
+                      </div>
+                      <div>
+                        <span className="text-white font-semibold text-base">{item.collection}</span>
+                        <div className="text-xs text-gray-400">Recycled Collection</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">{getNetworkIcon(item.network)}</td>
+                  <td className="py-4 px-6">
+                    <div className="text-white font-medium">{item.date}</div>
+                    <div className="text-xs text-gray-400">Recycled</div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-bold text-lg">{item.nftCount}</span>
+                      <span className="text-gray-400 text-sm">NFTs</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-bold text-lg">{item.points}</span>
+                      <span className="text-gray-400 text-sm">points</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
