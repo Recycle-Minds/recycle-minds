@@ -1,5 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js'
 import { getAssetsByOwner, getAsset, DasAsset } from './das-api'
+import { StatsService, RecycledNFT } from './stats-service'
 
 export interface NFTAccount {
   mint: string
@@ -314,7 +315,29 @@ export class NFTService {
       this.log('Simulating NFT burn - in production this would close the token account and recover rent')
       await new Promise(resolve => setTimeout(resolve, 2000))
       
+      // Calculate stats for the recycled NFT
+      const nftValue = 0.1 // Estimated NFT value for points calculation
+      const solRecovered = 0.002 // Typical rent recovery
+      
+      // Create recycled NFT record
+      const recycledNFT: RecycledNFT = {
+        mint: mintAddress,
+        name: asset.content?.metadata?.name || asset.json?.name || `NFT #${mintAddress.slice(0, 8)}`,
+        image: asset.content?.files?.[0]?.uri || asset.content?.metadata?.image || '/placeholder.jpg',
+        collection: asset.json?.collection?.name || 'Unknown Collection',
+        recycledAt: new Date().toISOString(),
+        solRecovered,
+        pointsEarned: StatsService.calculatePoints(nftValue),
+        co2Saved: StatsService.calculateCO2Saved(nftValue),
+        txSignature: 'simulated_signature_' + Date.now()
+      }
+      
+      // Add to stats
+      StatsService.addRecycledNFT(owner.toString(), recycledNFT)
+      
       this.log('NFT burned successfully:', mintAddress)
+      this.log('Stats updated - Points:', recycledNFT.pointsEarned, 'SOL:', recycledNFT.solRecovered, 'CO2:', recycledNFT.co2Saved)
+      
       return true
     } catch (error) {
       console.error('Error burning NFT:', error)
