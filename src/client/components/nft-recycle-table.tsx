@@ -74,7 +74,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <Input
             placeholder="Search by Collection or Contract"
-            className="pl-10 bg-[#1a1a1a] border-gray-700 text-white placeholder:text-gray-500"
+            className="pl-10 bg-[#1a1a1a] border-gray-800/30 text-white placeholder:text-gray-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

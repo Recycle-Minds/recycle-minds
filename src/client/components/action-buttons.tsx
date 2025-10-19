@@ -1,70 +1,62 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-
 interface ActionButtonsProps {
   activeTab: "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle"
   onTabChange: (tab: "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle") => void
 }
 
 export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
+  const tabs = [
+    { id: "why-recycle", label: "Why Recycle?", color: "green" },
+    { id: "digital-recycler", label: "Digital Recycler", color: "green" },
+    { id: "recycling-history", label: "History", color: "green" },
+    { id: "view-collection", label: "View Collection", color: "gray" },
+    { id: "claim-sol", label: "Claim SOL", color: "teal" }
+  ]
+
   return (
-    <div className="flex flex-wrap gap-3 mb-8">
-      <Button
-        variant={activeTab === "why-recycle" ? "default" : "outline"}
-        className={
-          activeTab === "why-recycle"
-            ? "bg-[#00ff00] text-black hover:bg-[#00dd00]"
-            : "border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
-        }
-        onClick={() => onTabChange("why-recycle")}
-      >
-        Why Recycle NFTs?
-      </Button>
-      <Button
-        className={
-          activeTab === "digital-recycler"
-            ? "bg-[#00ff00] text-black hover:bg-[#00dd00]"
-            : "border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
-        }
-        variant={activeTab === "digital-recycler" ? "default" : "outline"}
-        onClick={() => onTabChange("digital-recycler")}
-      >
-        Digital Recycler
-      </Button>
-      <Button
-        variant={activeTab === "recycling-history" ? "default" : "outline"}
-        className={
-          activeTab === "recycling-history"
-            ? "bg-[#00ff00] text-black hover:bg-[#00dd00]"
-            : "border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black bg-transparent"
-        }
-        onClick={() => onTabChange("recycling-history")}
-      >
-        Recycling History
-      </Button>
-      <Button
-        variant={activeTab === "view-collection" ? "default" : "outline"}
-        className={
-          activeTab === "view-collection"
-            ? "bg-[#00ff00] text-black hover:bg-[#00dd00]"
-            : "border-gray-600 text-gray-400 hover:bg-gray-800 bg-transparent"
-        }
-        onClick={() => onTabChange("view-collection")}
-      >
-        View Collection
-      </Button>
-      <Button
-        variant={activeTab === "claim-sol" ? "default" : "outline"}
-        className={
-          activeTab === "claim-sol"
-            ? "bg-[#00ff00] text-black hover:bg-[#00dd00]"
-            : "border-teal-600 text-teal-400 hover:bg-teal-900 bg-transparent"
-        }
-        onClick={() => onTabChange("claim-sol")}
-      >
-        Claim SOL
-      </Button>
+    <div className="relative mb-8">
+      {/* Tab Container with Background */}
+      <div className="relative bg-[#0f0f0f] rounded-2xl p-2 border border-gray-800/30 backdrop-blur-sm">
+        {/* Active Tab Background */}
+        <div 
+          className="absolute top-2 bottom-2 bg-gradient-to-r from-[#00ff00]/20 to-[#00ff00]/10 rounded-xl transition-all duration-500 ease-out"
+          style={{
+            left: `${tabs.findIndex(tab => tab.id === activeTab) * (100 / tabs.length)}%`,
+            width: `${100 / tabs.length}%`,
+          }}
+        />
+        
+        {/* Tab Buttons */}
+        <div className="relative flex">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id
+            const isDisabled = tab.id === "view-collection" && activeTab !== "view-collection"
+            
+            return (
+              <button
+                key={tab.id}
+                onClick={() => !isDisabled && onTabChange(tab.id as any)}
+                disabled={isDisabled}
+                className={`
+                  relative flex-1 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ease-out
+                  ${isActive 
+                    ? 'text-[#00ff00] font-semibold' 
+                    : isDisabled
+                    ? 'text-gray-500 cursor-not-allowed'
+                    : tab.color === 'teal'
+                    ? 'text-teal-400 hover:text-teal-300'
+                    : 'text-gray-400 hover:text-[#00ff00]'
+                  }
+                `}
+              >
+                <span className="relative z-10">{tab.label}</span>
+                
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
