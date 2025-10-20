@@ -67,7 +67,7 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
     }
   }
 
-  const selectedPoints = selectedNFTs.length * 10 // 10 points per NFT
+  const selectedPoints = (selectedNFTs.length * 0.00268).toFixed(5)
 
   if (!isConnected) {
     return (

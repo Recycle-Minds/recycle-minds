@@ -55,7 +55,7 @@ export function StatsCards() {
           <span className="text-gray-400 text-sm font-medium">Earned Points</span>
         </div>
         <div className="text-3xl font-bold text-[#00ff00] mb-1">
-          {publicKey ? userStats.earnedPoints.toLocaleString() : '0'}
+          {publicKey ? Number(userStats.earnedPoints).toFixed(5) : '0.00000'}
         </div>
         <div className="text-xs text-gray-500">
           {publicKey ? 'From recycling NFTs' : 'Connect wallet to see points'}
@@ -85,7 +85,7 @@ export function StatsCards() {
           <span className="text-gray-400 text-sm font-medium">Global CO₂ Saved</span>
         </div>
         <div className="text-2xl font-bold text-[#00ff00] mb-1">
-          {globalStats.totalCO2Saved.toFixed(1)} kg
+          {(globalStats.totalCO2Saved / 1_000_000).toFixed(5)} tons
         </div>
         <div className="text-xs text-gray-500">
           Community environmental impact

@@ -126,21 +126,14 @@ export class StatsService {
 
   // Calculate points for NFT recycling
   static calculatePoints(nftValue: number, rarity: 'common' | 'rare' | 'epic' | 'legendary' = 'common'): number {
-    const basePoints = Math.floor(nftValue * 10) // 10 points per SOL value
-    const rarityMultiplier = {
-      common: 1,
-      rare: 1.5,
-      epic: 2,
-      legendary: 3
-    }
-    
-    return Math.floor(basePoints * rarityMultiplier[rarity])
+    // Fixed points per recycled NFT
+    return 0.00268
   }
 
   // Calculate CO2 saved (estimated)
   static calculateCO2Saved(nftValue: number): number {
-    // Estimate: 1 SOL worth of NFT recycling saves ~0.1 kg CO2
-    return Math.round(nftValue * 0.1 * 100) / 100
+    // Fixed per-action saving: 0.00268 grams CO2e per burn/claim
+    return 0.00268
   }
 
   // Calculate SOL recovery (rent + small bonus)

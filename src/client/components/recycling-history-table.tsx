@@ -182,7 +182,7 @@ export function RecyclingHistoryTable() {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-bold text-lg">{item.points}</span>
+                      <span className="text-white font-bold text-lg">{item.points.toFixed(5)}</span>
                       <span className="text-gray-400 text-sm">points</span>
                     </div>
                   </td>
