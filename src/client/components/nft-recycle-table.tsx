@@ -4,22 +4,68 @@ import { Search, ChevronDown, Loader2 } from "lucide-react"
 import { useNFTs } from "@/hooks/use-nfts"
 import { useRecycling } from "@/hooks/use-recycling"
 import { useWalletInfo } from "@/hooks/use-wallet-info"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useConnection, useWallet } from "@solana/wallet-adapter-react"
+import { PublicKey } from "@solana/web3.js"
+import { getAssociatedTokenAddress } from "@solana/spl-token"
 
 interface NFTRecycleTableProps {
   onViewCollection?: (collectionAddress: string) => void
 }
 
 export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
-  const { collections, loading, error } = useNFTs()
+  const { collections, loading, error, nfts } = useNFTs() as any
   const { burnCollection, isBurning } = useRecycling()
   const { isConnected } = useWalletInfo()
+  const { publicKey } = useWallet()
+  const { connection } = useConnection()
   const [searchTerm, setSearchTerm] = useState("")
   const [burningCollections, setBurningCollections] = useState<string[]>([])
+  const [realSolByCollection, setRealSolByCollection] = useState<Record<string, number>>({})
 
   const filteredCollections = collections.filter(collection =>
     collection.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // Compute real SOL recoverable per collection by summing lamports in token/core accounts
+  useEffect(() => {
+    if (!isConnected || !publicKey || !connection || !collections?.length) return
+
+    let cancelled = false
+    ;(async () => {
+      const results: Record<string, number> = {}
+      for (const col of collections) {
+        try {
+          const key: string = col.collection?.address || col.mint
+          // Find NFTs in this collection
+          const inCol = (nfts || []).filter((n: any) => {
+            if (key === n.mint) return true
+            return n.collection?.address === key
+          })
+          let lamportsSum = 0n
+          for (const nft of inCol) {
+            try {
+              if (nft.interface === 'MplCoreAsset') {
+                const assetPk = new PublicKey(nft.mint)
+                const info = await connection.getAccountInfo(assetPk)
+                if (info) lamportsSum += BigInt(info.lamports)
+              } else {
+                const mintPk = new PublicKey(nft.mint)
+                const ata = await getAssociatedTokenAddress(mintPk, publicKey, true)
+                const info = await connection.getAccountInfo(ata)
+                if (info) lamportsSum += BigInt(info.lamports)
+              }
+            } catch {}
+          }
+          const sol = Number(lamportsSum) / 1_000_000_000
+          results[key] = sol
+        } catch {}
+      }
+      if (!cancelled) setRealSolByCollection(results)
+    })()
+
+    return () => { cancelled = true }
+  }, [isConnected, publicKey, connection, collections, nfts])
 
   const handleRecycleAll = async (collectionAddress: string) => {
     if (!isConnected) return
@@ -104,6 +150,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                 <th className="text-left py-4 px-6 text-white font-semibold text-base">Collection</th>
                 <th className="text-left py-4 px-6 text-white font-semibold text-base">Network</th>
                 <th className="text-left py-4 px-6 text-white font-semibold text-base">Owned NFTs</th>
+                <th className="text-left py-4 px-6 text-white font-semibold text-base">SOL to recover</th>
                 <th className="text-center py-4 px-6 text-white font-semibold text-base">Actions</th>
                 </tr>
               </thead>
@@ -142,6 +189,18 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                       <div className="flex items-center gap-2">
                         <span className="text-white font-bold text-lg">{collection.count}</span>
                         <span className="text-gray-400 text-sm">NFTs</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-bold text-lg">
+                          {(() => {
+                            const key: string = collection.collection?.address || collection.mint
+                            const v = realSolByCollection[key]
+                            return v !== undefined ? v.toFixed(6) : '—'
+                          })()}
+                        </span>
+                        <span className="text-gray-400 text-sm">SOL</span>
                       </div>
                     </td>
                     <td className="py-4 px-6">

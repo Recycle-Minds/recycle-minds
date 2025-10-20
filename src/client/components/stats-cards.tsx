@@ -99,11 +99,26 @@ export function StatsCards() {
           </div>
           <span className="text-gray-300 text-sm font-medium">SOL to Claim</span>
         </div>
-        <div className="text-3xl font-bold text-teal-400 mb-1">
-          {publicKey ? recoverableSOL.toFixed(6) : '0.000000'}
+        
+        {/* Total SOL */}
+        <div className="text-3xl font-bold text-teal-400 mb-3">
+          {publicKey ? (recoverableSOL + userStats.solClaimed).toFixed(6) : '0.000000'}
         </div>
-        <div className="text-xs text-gray-300">
-          {publicKey ? 'Available to claim' : 'Connect wallet to see SOL'}
+        
+        {/* Breakdown */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-teal-300/80">Empty accounts:</span>
+            <span className="text-teal-300 font-semibold">{publicKey ? recoverableSOL.toFixed(6) : '0.000000'}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-teal-300/80">From burns:</span>
+            <span className="text-teal-300 font-semibold">{publicKey ? userStats.solClaimed.toFixed(6) : '0.000000'}</span>
+          </div>
+        </div>
+        
+        <div className="text-xs text-gray-300 mt-3 pt-2 border-t border-teal-400/20">
+          {publicKey ? 'Total available to claim' : 'Connect wallet to see SOL'}
         </div>
       </Card>
     </div>
