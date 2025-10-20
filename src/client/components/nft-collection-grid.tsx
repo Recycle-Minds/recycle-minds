@@ -50,6 +50,7 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
     setSelectedNFTs([])
   }
 
+
   const handleRecycleSingle = async (mintAddress: string) => {
     if (!isConnected) return
     try {
@@ -141,7 +142,7 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
               <span className="text-white text-2xl font-bold">{selectedPoints}</span>
             </div>
 
-            {/* Right Side - Recycle Button */}
+          {/* Right Side - Recycle Button */}
             <Button
               className="relative bg-gradient-to-r from-[#00ff00] to-[#00dd00] text-black hover:from-[#00ff00] hover:to-[#00ff00] px-10 py-6 text-base font-black border-0 transition-all duration-500 rounded-xl shadow-[0_0_20px_rgba(0,255,0,0.4)] hover:shadow-[0_0_30px_rgba(0,255,0,0.6)] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-[0_0_10px_rgba(0,255,0,0.2)]"
               disabled={selectedNFTs.length === 0}
