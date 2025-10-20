@@ -476,4 +476,37 @@ export class NFTService {
       throw new Error('Failed to burn NFT')
     }
   }
+
+  // Update stats after a successful burn transaction (without fetching asset data)
+  async updateStatsAfterBurn(mintAddress: string, owner: PublicKey, name: string, image: string, collection: string): Promise<void> {
+    try {
+      this.log('Updating stats for burned NFT:', mintAddress)
+      
+      // Calculate stats for the recycled NFT
+      const nftValue = 0.1 // Estimated NFT value for points calculation
+      const solRecovered = 0.002 // Typical rent recovery
+      
+      // Create recycled NFT record
+      const recycledNFT: RecycledNFT = {
+        mint: mintAddress,
+        name: name,
+        image: image,
+        collection: collection,
+        recycledAt: new Date().toISOString(),
+        solRecovered,
+        pointsEarned: StatsService.calculatePoints(nftValue),
+        co2Saved: StatsService.calculateCO2Saved(nftValue),
+        txSignature: 'real_burn_' + Date.now()
+      }
+      
+      // Add to stats
+      StatsService.addRecycledNFT(owner.toString(), recycledNFT)
+      
+      this.log('Stats updated for burned NFT:', mintAddress)
+      this.log('Stats updated - Points:', recycledNFT.pointsEarned, 'SOL:', recycledNFT.solRecovered, 'CO2:', recycledNFT.co2Saved)
+    } catch (error) {
+      console.error('Error updating stats after burn:', error)
+      throw new Error('Failed to update stats after burn')
+    }
+  }
 }

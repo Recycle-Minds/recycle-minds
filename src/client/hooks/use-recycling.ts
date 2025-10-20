@@ -6,6 +6,7 @@ import { useWalletInfo } from './use-wallet-info'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { NFTService } from '@/lib/nft-service'
 import { PublicKey } from '@solana/web3.js'
+import toast from 'react-hot-toast'
 
 export function useRecycling() {
   const { burnNFT, getNFTsByCollection } = useNFTs()
@@ -24,6 +25,7 @@ export function useRecycling() {
     const burnedMints: string[] = []
 
     setBurning(nfts.map(nft => nft.mint))
+    const loadingToast = toast.loading(`Starting to burn ${nfts.length} NFT(s)...`, { id: 'burning-collection' })
 
     try {
       for (const nft of nfts) {
@@ -63,16 +65,28 @@ export function useRecycling() {
 
           // Update stats after successful burn
           const statsService = new NFTService(connection)
-          await statsService.burnNFT(nft.mint, publicKey)
+          await statsService.updateStatsAfterBurn(nft.mint, publicKey, nft.name, nft.image, nft.collection?.name || 'Unknown Collection')
 
           burnedMints.push(nft.mint)
           setBurnedNFTs(prev => [...prev, nft.mint])
         } catch (err) {
           console.error(`Failed to burn NFT ${nft.mint}:`, err)
+          // Don't show individual error toasts, just log them
         }
       }
     } finally {
       setBurning([])
+      toast.dismiss('burning-collection')
+      
+      if (burnedMints.length > 0) {
+        toast.success(`Successfully burned ${burnedMints.length} NFT(s)! Check your wallet and history.`, {
+          duration: 4000
+        })
+      } else {
+        toast.error('Failed to burn any NFTs. Please try again.', {
+          duration: 5000
+        })
+      }
     }
 
     return {
