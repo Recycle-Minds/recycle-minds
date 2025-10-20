@@ -6,12 +6,16 @@ import { useWalletInfo } from './use-wallet-info'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { NFTService } from '@/lib/nft-service'
 import { PublicKey } from '@solana/web3.js'
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
+import { publicKey as umiPublicKey } from '@metaplex-foundation/umi'
+import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters'
+import { burnV1, mplCore } from '@metaplex-foundation/mpl-core'
 import toast from 'react-hot-toast'
 
 export function useRecycling() {
   const { burnNFT, getNFTsByCollection } = useNFTs()
   const { isConnected } = useWalletInfo()
-  const { publicKey, sendTransaction } = useWallet()
+  const { publicKey, sendTransaction, wallet } = useWallet()
   const { connection } = useConnection()
   const [burning, setBurning] = useState<string[]>([])
   const [burnedNFTs, setBurnedNFTs] = useState<string[]>([])
@@ -36,36 +40,49 @@ export function useRecycling() {
           // Build and send the actual burn transaction
           const service = new NFTService(connection)
           
-          // Handle undefined interface by trying different NFT types
-          let tx
-          const interfaces = nft.interface ? [nft.interface] : ['V1_NFT', 'ProgrammableNFT']
-          
-          for (const interfaceType of interfaces) {
-            try {
-              const nftWithInterface = {
-                ...nft,
-                interface: interfaceType
-              }
-              
-              tx = await service.buildBurnTransactionAuto(nftWithInterface as any, publicKey)
-              break // Success, exit the loop
-            } catch (err) {
-              console.log(`Failed to build transaction for ${nft.mint} with interface ${interfaceType}:`, err)
-              if (interfaceType === interfaces[interfaces.length - 1]) {
-                throw err // Re-throw if this was the last attempt
+          let signature: string | null = null
+          if (nft.interface === 'MplCoreAsset') {
+            if (!wallet) throw new Error('Wallet adapter not ready')
+            // Use UMI official Core burn with proper program repository
+            const umi = createUmi(connection.rpcEndpoint)
+              .use(walletAdapterIdentity((wallet as any)?.adapter))
+              .use(mplCore())
+            console.log('Sending Core burn via UMI for:', nft.mint)
+            const res = await burnV1(umi, { asset: umiPublicKey(nft.mint) }).sendAndConfirm(umi)
+            signature = res.signature
+            console.log('Core burn sent, signature:', signature)
+          } else {
+            // Handle undefined interface by trying different NFT types
+            let tx
+            const interfaces = nft.interface ? [nft.interface] : ['V1_NFT', 'ProgrammableNFT']
+            for (const interfaceType of interfaces) {
+              try {
+                const nftWithInterface = { ...nft, interface: interfaceType }
+                tx = await service.buildBurnTransactionAuto(nftWithInterface as any, publicKey)
+                break
+              } catch (err) {
+                console.log(`Failed to build transaction for ${nft.mint} with interface ${interfaceType}:`, err)
+                if (interfaceType === interfaces[interfaces.length - 1]) throw err
               }
             }
+            if (!tx) throw new Error('Failed to build transaction for any interface type')
+            tx.feePayer = publicKey
+            console.log('Sending burn transaction for:', nft.mint)
+            signature = await sendTransaction(tx, connection)
+            console.log('Transaction sent, signature:', signature)
+            await connection.confirmTransaction(signature, 'confirmed')
+            console.log('Transaction confirmed for:', nft.mint)
           }
           
-          if (!tx) throw new Error('Failed to build transaction for any interface type')
-          
-          tx.feePayer = publicKey
-          const signature = await sendTransaction(tx, connection)
-          await connection.confirmTransaction(signature, 'confirmed')
+          // Verify on-chain that the asset is actually gone
+          const verifier = new NFTService(connection)
+          const ok = await verifier.verifyBurnSuccess(nft.mint, publicKey, nft.interface)
+          if (!ok) {
+            throw new Error('On-chain verification failed: asset still present or not burned')
+          }
 
-          // Update stats after successful burn
-          const statsService = new NFTService(connection)
-          await statsService.updateStatsAfterBurn(nft.mint, publicKey, nft.name, nft.image, nft.collection?.name || 'Unknown Collection')
+          // Update stats after verified burn
+          await verifier.updateStatsAfterBurn(nft.mint, publicKey, nft.name, nft.image, nft.collection?.name || 'Unknown Collection')
 
           burnedMints.push(nft.mint)
           setBurnedNFTs(prev => [...prev, nft.mint])
@@ -134,8 +151,10 @@ export function useRecycling() {
       const sig = await sendTransaction(tx, connection)
       console.log('Burn tx sent:', sig)
 
-      // Update stats via existing service method (records local history)
-      await burnNFT(mintAddress)
+      // Verify then update stats
+      const ok = await service.verifyBurnSuccess(mintAddress, publicKey, (tx as any)?.interface || 'V1_NFT')
+      if (!ok) throw new Error('On-chain verification failed: asset still present or not burned')
+      await service.updateStatsAfterBurn(mintAddress, publicKey, 'Unknown NFT', '/placeholder.jpg', 'Unknown Collection')
       setBurnedNFTs(prev => [...prev, mintAddress])
       return true
     } catch (err) {

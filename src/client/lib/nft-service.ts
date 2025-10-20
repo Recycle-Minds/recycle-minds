@@ -1,4 +1,4 @@
-import { Connection, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
+import { Connection, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction } from '@solana/web3.js'
 import {
   getAssociatedTokenAddress,
   createBurnInstruction,
@@ -12,10 +12,9 @@ import {
   findTokenRecordPda,
   createBurnV1Instruction,
 } from '@metaplex-foundation/mpl-token-metadata'
-import {
-  PROGRAM_ID as CORE_PROGRAM_ID,
-  createRemoveCollectionV1Instruction as coreCreateRemoveCollectionV1Instruction,
-} from '@metaplex-foundation/mpl-core'
+import { createUmi } from '@metaplex-foundation/umi'
+import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters'
+import { createBurnV1Instruction as coreCreateBurnV1Instruction } from '@metaplex-foundation/mpl-core'
 import { getAssetsByOwner, getAsset, DasAsset } from './das-api'
 import { StatsService, RecycledNFT } from './stats-service'
 
@@ -306,30 +305,46 @@ export class NFTService {
     this.log('Building burn transaction for:', mintAddress)
     const mint = new PublicKey(mintAddress)
 
-    // Derive ATA
-    const ata = await getAssociatedTokenAddress(mint, owner, true)
+    try {
+      // Derive ATA
+      const ata = await getAssociatedTokenAddress(mint, owner, true)
+      this.log('Derived ATA:', ata.toString())
 
-    // Burn 1 token and close account to owner
-    const burnIx = createBurnInstruction(
-      ata,
-      mint,
-      owner,
-      1,
-      [],
-      TOKEN_PROGRAM_ID
-    )
+      // Check if the ATA actually exists
+      const ataInfo = await this.connection.getAccountInfo(ata)
+      if (!ataInfo) {
+        this.log('ATA does not exist for mint:', mintAddress)
+        throw new Error(`Associated token account does not exist for mint ${mintAddress}`)
+      }
 
-    const closeIx = createCloseAccountInstruction(
-      ata,
-      owner,      // destination (receive rent)
-      owner,      // owner/authority
-      [],
-      TOKEN_PROGRAM_ID
-    )
+      this.log('ATA exists, building burn instructions')
 
-    const tx = new Transaction()
-    tx.add(burnIx, closeIx)
-    return tx
+      // Burn 1 token and close account to owner
+      const burnIx = createBurnInstruction(
+        ata,
+        mint,
+        owner,
+        1,
+        [],
+        TOKEN_PROGRAM_ID
+      )
+
+      const closeIx = createCloseAccountInstruction(
+        ata,
+        owner,      // destination (receive rent)
+        owner,      // owner/authority
+        [],
+        TOKEN_PROGRAM_ID
+      )
+
+      const tx = new Transaction()
+      tx.add(burnIx, closeIx)
+      this.log('Built V1_NFT burn transaction successfully')
+      return tx
+    } catch (error) {
+      this.log('Error building V1_NFT burn transaction:', error)
+      throw new Error(`Failed to build V1_NFT burn transaction: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   // Build a burn for Programmable NFTs (pNFT) using Token Metadata burnV1
@@ -364,16 +379,93 @@ export class NFTService {
     if (nft.interface === 'V1_NFT') return this.buildBurnTransaction(nft.mint, owner)
     if (nft.interface === 'ProgrammableNFT') return this.buildProgrammableBurnTransaction(nft.mint, owner)
     if (nft.interface === 'MplCoreAsset') {
-      // For Core assets, we'll use a simple burn approach
-      // Since MPL Core burn instruction might not be available, we'll treat it as V1_NFT
-      console.log('Treating MplCoreAsset as V1_NFT for burn transaction')
-      return this.buildBurnTransaction(nft.mint, owner)
+      // For Core assets, we'll try the Core burn first, but fallback to V1_NFT if it fails
+      console.log('Building MplCoreAsset burn transaction for:', nft.mint)
+      try {
+        return await this.buildCoreAssetBurnTransaction(nft.mint, owner)
+      } catch (error) {
+        console.log('Core asset burn failed, falling back to V1_NFT approach:', error)
+        // Fallback to treating it as V1_NFT
+        try {
+          console.log('Trying V1_NFT approach for Core asset...')
+          const result = await this.buildBurnTransaction(nft.mint, owner)
+          console.log('V1_NFT approach succeeded!')
+          return result
+        } catch (v1Error) {
+          console.log('V1_NFT approach also failed, trying ProgrammableNFT approach:', v1Error)
+          // If V1_NFT also fails, try ProgrammableNFT approach
+          try {
+            console.log('Trying ProgrammableNFT approach for Core asset...')
+            const result = await this.buildProgrammableBurnTransaction(nft.mint, owner)
+            console.log('ProgrammableNFT approach succeeded!')
+            return result
+          } catch (pNFTError) {
+            console.log('ProgrammableNFT approach also failed, trying CoreAssetFallback:', pNFTError)
+            // As a last resort, try to find and close any token accounts for this mint
+            console.log('Trying CoreAssetFallback approach for Core asset...')
+            const result = await this.buildCoreAssetFallbackBurn(nft.mint, owner)
+            console.log('CoreAssetFallback approach succeeded!')
+            return result
+          }
+        }
+      }
     }
     if (nft.interface === 'MplCoreCollection') {
       // Removing a collection is different; skip by default to avoid footguns
       throw new Error('Burning Core collections is not supported in client-only flow')
     }
     throw new Error(`Unsupported burn interface: ${nft.interface}`)
+  }
+
+  // Build a burn transaction for MplCoreAsset
+  async buildCoreAssetBurnTransaction(mintAddress: string, owner: PublicKey): Promise<Transaction> {
+    this.log('Building Core asset burn transaction for:', mintAddress)
+    
+    // Build instruction compatible with web3.js tx using mpl-core's JS binding
+    const asset = new PublicKey(mintAddress)
+    const ix = coreCreateBurnV1Instruction({ asset, authority: owner, payer: owner })
+    const tx = new Transaction()
+    tx.add(ix)
+    return tx
+  }
+
+  // Fallback burn method for MplCoreAsset - tries to find and close any token accounts
+  async buildCoreAssetFallbackBurn(mintAddress: string, owner: PublicKey): Promise<Transaction> {
+    this.log('Building Core asset fallback burn for:', mintAddress)
+    
+    // No-op by design; there is no SPL fallback for Core assets.
+    throw new Error('MplCoreAsset burn fallback is not available; Core assets are not SPL tokens')
+  }
+
+  // Verify on-chain that an asset is actually gone/burned before updating stats
+  async verifyBurnSuccess(mintAddress: string, owner: PublicKey, iface: string): Promise<boolean> {
+    try {
+      if (iface === 'V1_NFT' || iface === 'ProgrammableNFT') {
+        const mint = new PublicKey(mintAddress)
+        const ata = await getAssociatedTokenAddress(mint, owner, true)
+        const ataInfo = await this.connection.getAccountInfo(ata)
+        if (!ataInfo) return true // account closed => burned/closed
+        try {
+          const parsed = await this.connection.getParsedAccountInfo(ata)
+          const amount = (parsed.value as any)?.data?.parsed?.info?.tokenAmount?.uiAmount ?? 0
+          return amount === 0
+        } catch {
+          return false
+        }
+      }
+      if (iface === 'MplCoreAsset') {
+        const rpcUrl = this.connection.rpcEndpoint
+        const asset = await getAsset(rpcUrl, mintAddress)
+        if (!asset) return true
+        if (asset.burnt) return true
+        if (asset.ownership?.owner && asset.ownership.owner !== owner.toString()) return true
+        return false
+      }
+      return false
+    } catch (e) {
+      this.log('verifyBurnSuccess error:', e)
+      return false
+    }
   }
 
   // Build a cleanup transaction that closes up to `limit` empty token accounts
