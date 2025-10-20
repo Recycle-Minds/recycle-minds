@@ -20,6 +20,7 @@ export function StatsCards() {
       if (!publicKey) return
 
       try {
+        console.log('Fetching token accounts for:', publicKey.toString())
         const response = await fetch(`/api/token-accounts?owner=${encodeURIComponent(publicKey.toString())}`)
         
         if (!response.ok) {
@@ -27,6 +28,7 @@ export function StatsCards() {
         }
 
         const data = await response.json()
+        console.log('Token accounts API response:', data)
         
         if (data.error) {
           throw new Error(`API error: ${data.error}`)
@@ -34,6 +36,8 @@ export function StatsCards() {
 
         const emptyAccountsCount = data.emptyAccountsCount || 0
         const recoverable = StatsService.calculateRecoverableSOL(emptyAccountsCount)
+        console.log('Empty accounts count:', emptyAccountsCount)
+        console.log('Recoverable SOL:', recoverable)
         setRecoverableSOL(recoverable)
       } catch (error) {
         console.error('Error fetching recoverable SOL:', error)
