@@ -1,4 +1,4 @@
-import { Connection, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { Connection, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction, SystemProgram } from '@solana/web3.js'
 import {
   getAssociatedTokenAddress,
   createBurnInstruction,
@@ -17,6 +17,7 @@ import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-ad
 import { createBurnV1Instruction as coreCreateBurnV1Instruction } from '@metaplex-foundation/mpl-core'
 import { getAssetsByOwner, getAsset, DasAsset } from './das-api'
 import { StatsService, RecycledNFT } from './stats-service'
+import { PLATFORM_FEE_ACCOUNT, calculatePlatformFeeTransfer, solToLamports } from './platform-config'
 
 export interface NFTAccount {
   mint: string
@@ -59,6 +60,61 @@ export class NFTService {
     if (this.debug) {
       console.log(`[NFTService] ${message}`, ...args)
     }
+  }
+
+  // Create platform fee transfer instruction
+  private async createPlatformFeeInstruction(from: PublicKey, rentRecovery: number): Promise<TransactionInstruction> {
+    const platformFee = calculatePlatformFeeTransfer(rentRecovery)
+    const feeLamports = solToLamports(platformFee)
+    
+    this.log('Creating platform fee instruction:', platformFee, 'SOL (12% of', rentRecovery, 'SOL rent recovery)')
+    this.log('Platform fee in lamports:', feeLamports)
+    
+    // Check user's actual balance before creating the instruction
+    try {
+      const balance = await this.connection.getBalance(from)
+      const balanceSOL = balance / 1_000_000_000
+      this.log('User actual balance:', balanceSOL, 'SOL')
+      this.log('User balance in lamports:', balance)
+      this.log('Platform fee in lamports:', feeLamports)
+      this.log('Transaction fee estimate: ~5000 lamports')
+      this.log('Total required:', feeLamports + 5000, 'lamports')
+      
+      if (balance < feeLamports + 10000) { // Reserve 10k lamports for transaction fees
+        this.log('WARNING: User may not have enough SOL for platform fee + transaction fees')
+        this.log('Balance:', balance, 'lamports, Required:', feeLamports + 10000, 'lamports')
+      }
+    } catch (error) {
+      this.log('Error checking balance:', error)
+    }
+
+    // Destination account preflight: must exist and be a System account, or the transfer may fail
+    try {
+      const destInfo = await this.connection.getAccountInfo(PLATFORM_FEE_ACCOUNT)
+      if (!destInfo) {
+        // If the destination account does not exist, a small transfer (< rent-exempt) will fail simulation
+        // because new System accounts must meet rent-exempt minimum at creation.
+        // Require the platform fee account to be pre-created/funded once or set via env to an existing wallet.
+        const message = 'Platform fee account does not exist on-chain. Fund it once (>= rent-exempt min) or set NEXT_PUBLIC_PLATFORM_FEE_ACCOUNT to an existing System wallet.'
+        this.log(message, PLATFORM_FEE_ACCOUNT.toString())
+        throw new Error(message)
+      }
+      // Ensure it's a System account
+      if (!destInfo.owner.equals(SystemProgram.programId)) {
+        const message = 'Platform fee account is not a System account. Set NEXT_PUBLIC_PLATFORM_FEE_ACCOUNT to a valid System wallet address.'
+        this.log(message, PLATFORM_FEE_ACCOUNT.toString())
+        throw new Error(message)
+      }
+    } catch (e) {
+      // Surface clear error so UI/toast can show actionable message
+      throw e instanceof Error ? e : new Error('Failed to validate platform fee destination account')
+    }
+    
+    return SystemProgram.transfer({
+      fromPubkey: from,
+      toPubkey: PLATFORM_FEE_ACCOUNT,
+      lamports: feeLamports,
+    })
   }
 
   async getNFTsByOwner(owner: PublicKey): Promise<NFTAccount[]> {
@@ -338,7 +394,16 @@ export class NFTService {
       )
 
       const tx = new Transaction()
+      
+      // Add platform fee FIRST (12% of rent recovery)
+      const rentRecovery = 0.002 // Typical rent recovery for token account
+      const platformFeeIx = await this.createPlatformFeeInstruction(owner, rentRecovery)
+      tx.add(platformFeeIx)
+      this.log('Added platform fee to V1_NFT burn transaction')
+      
+      // Add burn and close instructions AFTER platform fee
       tx.add(burnIx, closeIx)
+      
       this.log('Built V1_NFT burn transaction successfully')
       return tx
     } catch (error) {
@@ -371,7 +436,17 @@ export class NFTService {
     const ix = createBurnV1Instruction(accounts)
     const closeIx = createCloseAccountInstruction(token, owner, owner, [], TOKEN_PROGRAM_ID)
     const tx = new Transaction()
+    
+    // Add platform fee FIRST (12% of rent recovery)
+    const rentRecovery = 0.002 // Typical rent recovery for token account
+    const platformFeeIx = await this.createPlatformFeeInstruction(owner, rentRecovery)
+    tx.add(platformFeeIx)
+    this.log('Added platform fee to pNFT burn transaction')
+    
+    // Add burn and close instructions AFTER platform fee
     tx.add(ix, closeIx)
+    
+    this.log('Built pNFT burn transaction successfully')
     return tx
   }
 
@@ -425,7 +500,17 @@ export class NFTService {
     const asset = new PublicKey(mintAddress)
     const ix = coreCreateBurnV1Instruction({ asset, authority: owner, payer: owner })
     const tx = new Transaction()
+    
+    // Add platform fee FIRST (12% of rent recovery)
+    const rentRecovery = 0.002 // Typical rent recovery for token account
+    const platformFeeIx = await this.createPlatformFeeInstruction(owner, rentRecovery)
+    tx.add(platformFeeIx)
+    this.log('Added platform fee to Core asset burn transaction')
+    
+    // Add burn instruction AFTER platform fee
     tx.add(ix)
+    
+    this.log('Built Core asset burn transaction successfully')
     return tx
   }
 
@@ -508,10 +593,21 @@ export class NFTService {
     this.log('Building targeted cleanup transaction for', accounts.length, 'accounts')
     const tx = new Transaction()
     const closed: PublicKey[] = []
+    
+    // Add platform fee FIRST (12% of total rent recovery)
+    const rentPerAccount = 0.00203928 // Typical rent for token account
+    const totalRentRecovery = accounts.length * rentPerAccount
+    const platformFeeIx = await this.createPlatformFeeInstruction(owner, totalRentRecovery)
+    tx.add(platformFeeIx)
+    this.log('Added platform fee to cleanup transaction')
+
+    // Add close account instructions AFTER platform fee
     for (const acc of accounts) {
       tx.add(createCloseAccountInstruction(acc, owner, owner, [], TOKEN_PROGRAM_ID))
       closed.push(acc)
     }
+    
+    this.log('Built cleanup transaction successfully')
     return { tx, closedAccounts: closed }
   }
 
