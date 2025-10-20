@@ -124,6 +124,7 @@ export function useRecycling() {
     if (!publicKey) throw new Error('No wallet')
 
     setBurning([mintAddress])
+    const loadingToast = toast.loading('Burning NFT...', { id: `burn-${mintAddress}` })
 
     try {
       // Build and send real transaction on mainnet
@@ -178,9 +179,15 @@ export function useRecycling() {
       if (!ok) throw new Error('On-chain verification failed: asset still present or not burned')
       await service.updateStatsAfterBurn(mintAddress, publicKey, 'Unknown NFT', '/placeholder.jpg', 'Unknown Collection')
       setBurnedNFTs(prev => [...prev, mintAddress])
+      
+      toast.success('NFT burned successfully!', { id: `burn-${mintAddress}` })
       return true
     } catch (err) {
       console.error(`Failed to burn NFT ${mintAddress}:`, err)
+      toast.error(`Failed to burn NFT: ${err instanceof Error ? err.message : 'Unknown error'}`, { 
+        id: `burn-${mintAddress}`,
+        duration: 5000
+      })
       return false
     } finally {
       setBurning(prev => prev.filter(mint => mint !== mintAddress))
@@ -190,26 +197,64 @@ export function useRecycling() {
   const cleanupClaim = async (limit: number = 10) => {
     if (!isConnected) throw new Error('Wallet not connected')
     if (!publicKey) throw new Error('No wallet')
-    const service = new NFTService(connection)
-    const { tx, closedAccounts } = await service.buildCleanupTransaction(publicKey, limit)
-    if (closedAccounts.length === 0) return { signature: null, closed: 0 }
-    tx.feePayer = publicKey
-    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-    const signature = await sendTransaction(tx, connection)
-    return { signature, closed: closedAccounts.length }
+    
+    const loadingToast = toast.loading('Closing empty accounts...', { id: 'cleanup-claim' })
+    
+    try {
+      const service = new NFTService(connection)
+      const { tx, closedAccounts } = await service.buildCleanupTransaction(publicKey, limit)
+      if (closedAccounts.length === 0) {
+        toast.dismiss('cleanup-claim')
+        toast.info('No empty accounts found to close')
+        return { signature: null, closed: 0 }
+      }
+      
+      tx.feePayer = publicKey
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      const signature = await sendTransaction(tx, connection)
+      
+      toast.success(`Successfully closed ${closedAccounts.length} empty account(s)!`, { id: 'cleanup-claim' })
+      return { signature, closed: closedAccounts.length }
+    } catch (err) {
+      console.error('Failed to close empty accounts:', err)
+      toast.error(`Failed to close accounts: ${err instanceof Error ? err.message : 'Unknown error'}`, { 
+        id: 'cleanup-claim',
+        duration: 5000
+      })
+      throw err
+    }
   }
 
   const cleanupClaimSelected = async (accountAddresses: string[]) => {
     if (!isConnected) throw new Error('Wallet not connected')
     if (!publicKey) throw new Error('No wallet')
-    const service = new NFTService(connection)
-    const pubkeys = accountAddresses.map((a) => new PublicKey(a))
-    const { tx, closedAccounts } = await service.buildCleanupTransactionForAccounts(publicKey, pubkeys)
-    if (closedAccounts.length === 0) return { signature: null, closed: 0 }
-    tx.feePayer = publicKey
-    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-    const signature = await sendTransaction(tx, connection)
-    return { signature, closed: closedAccounts.length }
+    
+    const loadingToast = toast.loading(`Closing ${accountAddresses.length} selected account(s)...`, { id: 'cleanup-selected' })
+    
+    try {
+      const service = new NFTService(connection)
+      const pubkeys = accountAddresses.map((a) => new PublicKey(a))
+      const { tx, closedAccounts } = await service.buildCleanupTransactionForAccounts(publicKey, pubkeys)
+      if (closedAccounts.length === 0) {
+        toast.dismiss('cleanup-selected')
+        toast.info('No accounts to close')
+        return { signature: null, closed: 0 }
+      }
+      
+      tx.feePayer = publicKey
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      const signature = await sendTransaction(tx, connection)
+      
+      toast.success(`Successfully closed ${closedAccounts.length} selected account(s)!`, { id: 'cleanup-selected' })
+      return { signature, closed: closedAccounts.length }
+    } catch (err) {
+      console.error('Failed to close selected accounts:', err)
+      toast.error(`Failed to close selected accounts: ${err instanceof Error ? err.message : 'Unknown error'}`, { 
+        id: 'cleanup-selected',
+        duration: 5000
+      })
+      throw err
+    }
   }
 
   const isBurning = (mintAddress: string) => burning.includes(mintAddress)
