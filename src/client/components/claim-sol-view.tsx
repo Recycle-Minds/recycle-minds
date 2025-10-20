@@ -32,26 +32,24 @@ export function ClaimSolView() {
 
     setLoading(true)
     try {
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-        programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
-      })
+      const response = await fetch(`/api/empty-accounts?owner=${encodeURIComponent(publicKey.toString())}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
-      const empty: EmptyAccount[] = tokenAccounts.value
-        .filter((acc) => {
-          try {
-            const info: any = acc.account.data.parsed.info
-            const amount = info.tokenAmount?.uiAmount || 0
-            return amount === 0
-          } catch {
-            return false
-          }
-        })
-        .map(acc => ({
-          address: acc.pubkey.toString(),
-          mint: acc.account.data.parsed.info.mint,
-          amount: 0,
-          rent: 0.00203928 // Typical rent for token account
-        }))
+      const data = await response.json()
+      
+      if (data.error) {
+        throw new Error(`API error: ${data.error}`)
+      }
+
+      const empty: EmptyAccount[] = (data.emptyAccounts || []).map((acc: any) => ({
+        address: acc.address,
+        mint: acc.mint,
+        amount: 0,
+        rent: 0.00203928 // Typical rent for token account
+      }))
 
       setEmptyAccounts([...empty])
     } catch (error) {

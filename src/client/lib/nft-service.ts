@@ -121,25 +121,9 @@ export class NFTService {
     try {
       this.log('Fetching NFTs for owner:', owner.toString())
       
-      // Use Helius DAS API directly
-      const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY || 'demo-key'
-      const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
+      // Use secure server-side API route
+      const response = await fetch(`/api/nfts?owner=${encodeURIComponent(owner.toString())}`)
       
-      const response = await fetch(heliusUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: '1',
-          method: 'getAssetsByOwner',
-          params: {
-            ownerAddress: owner.toString(),
-            page: 1,
-            limit: 1000
-          }
-        })
-      })
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -147,60 +131,11 @@ export class NFTService {
       const data = await response.json()
       
       if (data.error) {
-        throw new Error(`RPC error: ${data.error.message}`)
+        throw new Error(`API error: ${data.error}`)
       }
 
-      const assets = data.result?.items || []
-      this.log('Total assets found via DAS API:', assets.length)
-
-      // Filter for NFT-like assets (exclude burnt ones)
-      const nftAssets = assets.filter(asset => 
-        !asset.burnt && 
-        (asset.interface === 'V1_NFT' || 
-         asset.interface === 'ProgrammableNFT' || 
-         asset.interface === 'MplCoreAsset' ||
-         asset.interface === 'MplCoreCollection')
-      )
-
-      this.log('NFT assets found via DAS API:', nftAssets.length)
-
-      const nftAccounts: NFTAccount[] = nftAssets.map(asset => {
-        const name = asset.content?.metadata?.name || asset.json?.name || `NFT #${asset.id.slice(0, 8)}`
-        const symbol = asset.content?.metadata?.symbol || asset.json?.symbol || 'NFT'
-        const image = asset.content?.files?.[0]?.uri || asset.content?.metadata?.image || '/placeholder.jpg'
-        
-        // Try to get collection info from grouping or metadata
-        let collection = undefined
-        if (asset.grouping && asset.grouping.length > 0) {
-          const collectionGroup = asset.grouping.find(g => g.group_key === 'collection')
-          if (collectionGroup) {
-            collection = {
-              name: collectionGroup.group_value,
-              address: collectionGroup.group_value,
-              verified: true // DAS API collections are verified
-            }
-          }
-        } else if (asset.json?.collection) {
-          collection = {
-            name: asset.json.collection.name || 'Unknown Collection',
-            address: asset.json.collection.address || asset.id,
-            verified: asset.json.collection.verified || false
-          }
-        }
-
-        return {
-          mint: asset.id,
-          owner: asset.ownership.owner,
-          name,
-          symbol,
-          image,
-          interface: asset.interface,
-          collection,
-          burnt: asset.burnt
-        }
-      })
-
-      this.log('Processed NFTs via DAS API:', nftAccounts.length)
+      const nftAccounts = data.nfts || []
+      this.log('Processed NFTs via secure API:', nftAccounts.length)
       return nftAccounts
     } catch (error) {
       console.error('Error fetching NFTs:', error)

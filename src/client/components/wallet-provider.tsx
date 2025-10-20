@@ -18,11 +18,9 @@ export function WalletContextProvider({ children }: WalletContextProviderProps) 
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
   const network = WalletAdapterNetwork.Mainnet
 
-  // Use a mainnet RPC endpoint that supports DAS API
+  // Use Helius RPC endpoint for client-side operations (API key is server-side only)
   const endpoint = useMemo(() => {
-    const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY || 'demo-key'
-    return `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
-    
+    return 'https://mainnet.helius-rpc.com'
   }, [network])
 
   const wallets = useMemo(

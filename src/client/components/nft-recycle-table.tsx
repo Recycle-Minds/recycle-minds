@@ -43,17 +43,30 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
             return n.collection?.address === key
           })
           let lamportsSum = 0n
+          const addressesToCheck: string[] = []
+          
           for (const nft of inCol) {
+            if (nft.interface === 'MplCoreAsset') {
+              addressesToCheck.push(nft.mint)
+            } else {
+              const mintPk = new PublicKey(nft.mint)
+              const ata = await getAssociatedTokenAddress(mintPk, publicKey, true)
+              addressesToCheck.push(ata.toString())
+            }
+          }
+          
+          if (addressesToCheck.length > 0) {
             try {
-              if (nft.interface === 'MplCoreAsset') {
-                const assetPk = new PublicKey(nft.mint)
-                const info = await connection.getAccountInfo(assetPk)
-                if (info) lamportsSum += BigInt(info.lamports)
-              } else {
-                const mintPk = new PublicKey(nft.mint)
-                const ata = await getAssociatedTokenAddress(mintPk, publicKey, true)
-                const info = await connection.getAccountInfo(ata)
-                if (info) lamportsSum += BigInt(info.lamports)
+              const response = await fetch(`/api/account-info?addresses=${addressesToCheck.join(',')}`)
+              if (response.ok) {
+                const data = await response.json()
+                if (data.results) {
+                  for (const result of data.results) {
+                    if (result.accountInfo) {
+                      lamportsSum += BigInt(result.accountInfo.lamports)
+                    }
+                  }
+                }
               }
             } catch {}
           }

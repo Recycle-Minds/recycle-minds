@@ -139,32 +139,9 @@ export async function getAssetsByOwner(
   forceRefresh: boolean = false
 ): Promise<DasAsset[]> {
   try {
-    // Use public RPC endpoint (no API key required)
-    const solanaUrl = 'https://api.mainnet-beta.solana.com'
+    // Use secure server-side API route
+    const response = await fetch(`/api/nfts?owner=${encodeURIComponent(owner)}`)
     
-    const response = await fetch(solanaUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 'my-id',
-        method: 'getAssetsByOwner',
-        params: {
-          ownerAddress: owner,
-          page,
-          limit,
-          sortBy: {
-            sortBy: 'created',
-            sortDirection: 'desc'
-          },
-          before: forceRefresh ? undefined : null,
-          after: forceRefresh ? undefined : null
-        }
-      })
-    })
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
@@ -172,10 +149,10 @@ export async function getAssetsByOwner(
     const data = await response.json()
     
     if (data.error) {
-      throw new Error(`RPC error: ${data.error.message}`)
+      throw new Error(`API error: ${data.error}`)
     }
 
-    return data.result?.items || []
+    return data.nfts || []
   } catch (error) {
     console.error('Error fetching assets by owner:', error)
     throw error
@@ -184,25 +161,9 @@ export async function getAssetsByOwner(
 
 export async function getAsset(rpcUrl: string, assetId: string): Promise<DasAsset | null> {
   try {
-    // Use Helius DAS endpoint with API key to avoid 403s
-    const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY || 'demo-key'
-    const solanaUrl = `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
+    // Use secure server-side API route
+    const response = await fetch(`/api/asset?id=${encodeURIComponent(assetId)}`)
     
-    const response = await fetch(solanaUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 'my-id',
-        method: 'getAsset',
-        params: {
-          id: assetId
-        }
-      })
-    })
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
@@ -210,10 +171,10 @@ export async function getAsset(rpcUrl: string, assetId: string): Promise<DasAsse
     const data = await response.json()
     
     if (data.error) {
-      throw new Error(`RPC error: ${data.error.message}`)
+      throw new Error(`API error: ${data.error}`)
     }
 
-    return data.result || null
+    return data.asset || null
   } catch (error) {
     console.error('Error fetching asset:', error)
     throw error
@@ -222,33 +183,11 @@ export async function getAsset(rpcUrl: string, assetId: string): Promise<DasAsse
 
 export async function getAssetsByIds(rpcUrl: string, assetIds: string[]): Promise<DasAsset[]> {
   try {
-    const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY || 'demo-key'
-    const solanaUrl = `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
-
-    const response = await fetch(solanaUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 'my-id',
-        method: 'getAssets',
-        params: {
-          ids: assetIds
-        }
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const data = await response.json()
-    if (data.error) {
-      throw new Error(`RPC error: ${data.error.message}`)
-    }
-    return data.result?.items || []
+    // For now, fetch each asset individually using the secure API route
+    // This could be optimized with a batch endpoint later
+    const promises = assetIds.map(id => getAsset(rpcUrl, id))
+    const results = await Promise.all(promises)
+    return results.filter(asset => asset !== null) as DasAsset[]
   } catch (error) {
     console.error('Error fetching assets by ids:', error)
     throw error

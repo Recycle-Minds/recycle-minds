@@ -17,23 +17,22 @@ export function StatsCards() {
 
   useEffect(() => {
     const fetchRecoverableSOL = async () => {
-      if (!publicKey || !connection) return
+      if (!publicKey) return
 
       try {
-        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-          programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
-        })
+        const response = await fetch(`/api/token-accounts?owner=${encodeURIComponent(publicKey.toString())}`)
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
 
-        const emptyAccountsCount = tokenAccounts.value.filter((acc) => {
-          try {
-            const info: any = acc.account.data.parsed.info
-            const amount = info.tokenAmount?.uiAmount || 0
-            return amount === 0
-          } catch {
-            return false
-          }
-        }).length
+        const data = await response.json()
+        
+        if (data.error) {
+          throw new Error(`API error: ${data.error}`)
+        }
 
+        const emptyAccountsCount = data.emptyAccountsCount || 0
         const recoverable = StatsService.calculateRecoverableSOL(emptyAccountsCount)
         setRecoverableSOL(recoverable)
       } catch (error) {
@@ -43,7 +42,7 @@ export function StatsCards() {
     }
 
     fetchRecoverableSOL()
-  }, [publicKey, connection])
+  }, [publicKey])
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
