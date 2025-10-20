@@ -2,7 +2,6 @@ import { PublicKey } from '@solana/web3.js'
 
 // Platform fee configuration from environment variables
 export const PLATFORM_FEE_PERCENTAGE = parseInt(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE || '12') // Platform fee percentage
-// TODO: Replace with actual platform fee account address - using a valid system account for now
 export const PLATFORM_FEE_ACCOUNT = new PublicKey(process.env.NEXT_PUBLIC_PLATFORM_FEE_ACCOUNT || '') // Platform fee account
 
 // Calculate platform fee from SOL amount

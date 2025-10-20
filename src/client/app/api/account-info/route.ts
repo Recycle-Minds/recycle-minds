@@ -20,6 +20,11 @@ export async function GET(request: NextRequest) {
 
     // Handle single address
     if (address) {
+      // Validate address format
+      if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
+        return NextResponse.json({ error: 'Invalid address format' }, { status: 400 })
+      }
+      
       const accountPubkey = new PublicKey(address)
       const accountInfo = await connection.getAccountInfo(accountPubkey)
       
@@ -58,6 +63,6 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error fetching account info:', error)
-    return NextResponse.json({ error: 'Failed to fetch account info' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
