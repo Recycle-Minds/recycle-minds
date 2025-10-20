@@ -124,7 +124,6 @@ export class NFTService {
       // Use Helius DAS API directly
       const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY || 'demo-key'
       const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
-      this.log('Using Helius DAS API:', heliusUrl)
       
       const response = await fetch(heliusUrl, {
         method: 'POST',
