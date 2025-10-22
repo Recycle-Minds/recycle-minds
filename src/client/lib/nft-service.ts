@@ -17,7 +17,7 @@ import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-ad
 import { createBurnV1Instruction as coreCreateBurnV1Instruction } from '@metaplex-foundation/mpl-core'
 import { getAssetsByOwner, getAsset, DasAsset } from './das-api'
 import { StatsService, RecycledNFT } from './stats-service'
-import { PLATFORM_FEE_ACCOUNT, calculatePlatformFeeTransfer, solToLamports } from './platform-config'
+import { PLATFORM_FEE_ACCOUNT, calculatePlatformFeeTransfer, solToLamports, calculateFeeDistribution, getFeeRecipients } from './platform-config'
 
 export interface NFTAccount {
   mint: string
@@ -62,59 +62,82 @@ export class NFTService {
     }
   }
 
-  // Create platform fee transfer instruction
-  private async createPlatformFeeInstruction(from: PublicKey, rentRecovery: number): Promise<TransactionInstruction> {
-    const platformFee = calculatePlatformFeeTransfer(rentRecovery)
-    const feeLamports = solToLamports(platformFee)
+  // Create platform fee transfer instructions for all recipients
+  private async createPlatformFeeInstructions(from: PublicKey, rentRecovery: number): Promise<TransactionInstruction[]> {
+    const feeDistribution = calculateFeeDistribution(rentRecovery)
+    const instructions: TransactionInstruction[] = []
     
-    this.log('Creating platform fee instruction:', platformFee, 'SOL (12% of', rentRecovery, 'SOL rent recovery)')
-    this.log('Platform fee in lamports:', feeLamports)
+    this.log('Creating fee distribution for', rentRecovery, 'SOL rent recovery:')
+    feeDistribution.forEach(({ recipient, amount }) => {
+      this.log(`- ${recipient.name}: ${amount.toFixed(6)} SOL (${recipient.percentage}%)`)
+    })
     
-    // Check user's actual balance before creating the instruction
+    // Check user's actual balance before creating the instructions
     try {
       const balance = await this.connection.getBalance(from)
       const balanceSOL = balance / 1_000_000_000
-      this.log('User actual balance:', balanceSOL, 'SOL')
-      this.log('User balance in lamports:', balance)
-      this.log('Platform fee in lamports:', feeLamports)
-      this.log('Transaction fee estimate: ~5000 lamports')
-      this.log('Total required:', feeLamports + 5000, 'lamports')
+      const totalFees = feeDistribution.reduce((sum, { amount }) => sum + amount, 0)
+      const totalFeeLamports = solToLamports(totalFees)
       
-      if (balance < feeLamports + 10000) { // Reserve 10k lamports for transaction fees
-        this.log('WARNING: User may not have enough SOL for platform fee + transaction fees')
-        this.log('Balance:', balance, 'lamports, Required:', feeLamports + 10000, 'lamports')
+      this.log('User actual balance:', balanceSOL, 'SOL')
+      this.log('Total fees required:', totalFees.toFixed(6), 'SOL')
+      this.log('Total fees in lamports:', totalFeeLamports)
+      this.log('Transaction fee estimate: ~5000 lamports')
+      this.log('Total required:', totalFeeLamports + 5000, 'lamports')
+      
+      if (balance < totalFeeLamports + 10000) { // Reserve 10k lamports for transaction fees
+        this.log('WARNING: User may not have enough SOL for platform fees + transaction fees')
+        this.log('Balance:', balance, 'lamports, Required:', totalFeeLamports + 10000, 'lamports')
       }
     } catch (error) {
       this.log('Error checking balance:', error)
     }
 
-    // Destination account preflight: must exist and be a System account, or the transfer may fail
-    try {
-      const destInfo = await this.connection.getAccountInfo(PLATFORM_FEE_ACCOUNT)
-      if (!destInfo) {
-        // If the destination account does not exist, a small transfer (< rent-exempt) will fail simulation
-        // because new System accounts must meet rent-exempt minimum at creation.
-        // Require the platform fee account to be pre-created/funded once or set via env to an existing wallet.
-        const message = 'Platform fee account does not exist on-chain. Fund it once (>= rent-exempt min) or set NEXT_PUBLIC_PLATFORM_FEE_ACCOUNT to an existing System wallet.'
-        this.log(message, PLATFORM_FEE_ACCOUNT.toString())
-        throw new Error(message)
+    // Validate all fee recipient accounts using server-side API
+    const addressesToValidate = feeDistribution
+      .filter(({ amount }) => amount > 0)
+      .map(({ recipient }) => recipient.address.toString())
+    
+    if (addressesToValidate.length > 0) {
+      try {
+        const response = await fetch(`/api/validate-fee-accounts?addresses=${addressesToValidate.join(',')}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        
+        const data = await response.json()
+        if (data.error) {
+          throw new Error(`API error: ${data.error}`)
+        }
+        
+        // Check validation results
+        for (const result of data.results) {
+          if (!result.valid) {
+            const recipient = feeDistribution.find(r => r.recipient.address.toString() === result.address)
+            const message = `Fee recipient account (${recipient?.name || 'Unknown'}) validation failed: ${result.error}`
+            this.log(message, result.address)
+            throw new Error(message)
+          }
+        }
+      } catch (e) {
+        // Surface clear error so UI/toast can show actionable message
+        throw e instanceof Error ? e : new Error('Failed to validate fee recipient accounts')
       }
-      // Ensure it's a System account
-      if (!destInfo.owner.equals(SystemProgram.programId)) {
-        const message = 'Platform fee account is not a System account. Set NEXT_PUBLIC_PLATFORM_FEE_ACCOUNT to a valid System wallet address.'
-        this.log(message, PLATFORM_FEE_ACCOUNT.toString())
-        throw new Error(message)
-      }
-    } catch (e) {
-      // Surface clear error so UI/toast can show actionable message
-      throw e instanceof Error ? e : new Error('Failed to validate platform fee destination account')
     }
     
-    return SystemProgram.transfer({
-      fromPubkey: from,
-      toPubkey: PLATFORM_FEE_ACCOUNT,
-      lamports: feeLamports,
-    })
+    // Create transfer instructions for all recipients
+    for (const { recipient, amount } of feeDistribution) {
+      if (amount <= 0) continue // Skip zero amounts
+      
+      const feeLamports = solToLamports(amount)
+      instructions.push(SystemProgram.transfer({
+        fromPubkey: from,
+        toPubkey: recipient.address,
+        lamports: feeLamports,
+      }))
+    }
+    
+    return instructions
   }
 
   async getNFTsByOwner(owner: PublicKey): Promise<NFTAccount[]> {
@@ -331,8 +354,8 @@ export class NFTService {
       
       // Add platform fee FIRST (12% of rent recovery)
       const rentRecovery = 0.002 // Typical rent recovery for token account
-      const platformFeeIx = await this.createPlatformFeeInstruction(owner, rentRecovery)
-      tx.add(platformFeeIx)
+      const platformFeeIxs = await this.createPlatformFeeInstructions(owner, rentRecovery)
+      platformFeeIxs.forEach(ix => tx.add(ix))
       this.log('Added platform fee to V1_NFT burn transaction')
       
       // Add burn and close instructions AFTER platform fee
@@ -373,8 +396,8 @@ export class NFTService {
     
     // Add platform fee FIRST (12% of rent recovery)
     const rentRecovery = 0.002 // Typical rent recovery for token account
-    const platformFeeIx = await this.createPlatformFeeInstruction(owner, rentRecovery)
-    tx.add(platformFeeIx)
+    const platformFeeIxs = await this.createPlatformFeeInstructions(owner, rentRecovery)
+    platformFeeIxs.forEach(ix => tx.add(ix))
     this.log('Added platform fee to pNFT burn transaction')
     
     // Add burn and close instructions AFTER platform fee
@@ -437,8 +460,8 @@ export class NFTService {
     
     // Add platform fee FIRST (12% of rent recovery)
     const rentRecovery = 0.002 // Typical rent recovery for token account
-    const platformFeeIx = await this.createPlatformFeeInstruction(owner, rentRecovery)
-    tx.add(platformFeeIx)
+    const platformFeeIxs = await this.createPlatformFeeInstructions(owner, rentRecovery)
+    platformFeeIxs.forEach(ix => tx.add(ix))
     this.log('Added platform fee to Core asset burn transaction')
     
     // Add burn instruction AFTER platform fee
@@ -531,8 +554,8 @@ export class NFTService {
     // Add platform fee FIRST (12% of total rent recovery)
     const rentPerAccount = 0.00203928 // Typical rent for token account
     const totalRentRecovery = accounts.length * rentPerAccount
-    const platformFeeIx = await this.createPlatformFeeInstruction(owner, totalRentRecovery)
-    tx.add(platformFeeIx)
+    const platformFeeIxs = await this.createPlatformFeeInstructions(owner, totalRentRecovery)
+    platformFeeIxs.forEach(ix => tx.add(ix))
     this.log('Added platform fee to cleanup transaction')
 
     // Add close account instructions AFTER platform fee

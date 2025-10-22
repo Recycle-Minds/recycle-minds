@@ -168,7 +168,13 @@ export function useRecycling() {
         }
         if (!tx) throw new Error('Failed to build transaction')
         tx.feePayer = publicKey
-        tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+        // Get latest blockhash from server-side API
+      const blockhashResponse = await fetch('/api/latest-blockhash')
+      if (!blockhashResponse.ok) {
+        throw new Error(`Failed to get latest blockhash: ${blockhashResponse.status}`)
+      }
+      const { blockhash } = await blockhashResponse.json()
+      tx.recentBlockhash = blockhash
         const sig = await sendTransaction(tx, connection)
         console.log('Burn tx sent:', sig)
         signature = sig
@@ -210,7 +216,13 @@ export function useRecycling() {
       }
       
       tx.feePayer = publicKey
-      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      // Get latest blockhash from server-side API
+      const blockhashResponse = await fetch('/api/latest-blockhash')
+      if (!blockhashResponse.ok) {
+        throw new Error(`Failed to get latest blockhash: ${blockhashResponse.status}`)
+      }
+      const { blockhash } = await blockhashResponse.json()
+      tx.recentBlockhash = blockhash
       const signature = await sendTransaction(tx, connection)
       
       toast.success(`Successfully closed ${closedAccounts.length} empty account(s)!`, { id: 'cleanup-claim' })
@@ -242,7 +254,13 @@ export function useRecycling() {
       }
       
       tx.feePayer = publicKey
-      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      // Get latest blockhash from server-side API
+      const blockhashResponse = await fetch('/api/latest-blockhash')
+      if (!blockhashResponse.ok) {
+        throw new Error(`Failed to get latest blockhash: ${blockhashResponse.status}`)
+      }
+      const { blockhash } = await blockhashResponse.json()
+      tx.recentBlockhash = blockhash
       const signature = await sendTransaction(tx, connection)
       
       toast.success(`Successfully closed ${closedAccounts.length} selected account(s)!`, { id: 'cleanup-selected' })
