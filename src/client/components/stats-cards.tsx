@@ -109,7 +109,7 @@ export function StatsCards() {
             <span className="text-gray-400 text-sm font-medium">Global CO₂ Saved</span>
           </div>
           <div className="text-2xl font-bold text-[#00ff00] mb-3">
-            {(globalStats.totalCO2Saved / 1_000_000).toFixed(5)} tons
+            {(globalStats.totalCO2Saved / 1_000_000).toFixed(5)} t
           </div>
           <div className="text-xs text-gray-300 bg-[#1a1a1a] rounded-lg p-2 border border-[#292929]">
             <div className="font-medium text-white mb-1">Calculation:</div>
