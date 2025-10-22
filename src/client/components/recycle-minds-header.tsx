@@ -19,22 +19,22 @@ export function RecycleMindsHeader() {
         </div>
 
         <nav className="hidden items-center gap-6 text-sm md:flex">
-          <a href="#" className="hover:text-[#00ff00] transition-colors">
+          <a href="https://recycleminds.xyz/" className="hover:text-[#00ff00] transition-colors">
             Home
           </a>
-          <a href="#" className="hover:text-[#00ff00] transition-colors">
+          <a href="https://recycleminds.xyz/headcoin/" className="hover:text-[#00ff00] transition-colors">
             $HEAD
           </a>
-          <a href="#" className="hover:text-[#00ff00] transition-colors">
+          <a href="https://recycleminds.xyz/mindsbr/" className="hover:text-[#00ff00] transition-colors">
             NFT Collections
           </a>
-          <a href="#" className="text-[#00ff00] hover:text-[#00ff00] transition-colors">
+          <a href="https://app.recycleminds.xyz/" className="text-[#00ff00] hover:text-[#00ff00] transition-colors">
             Digital Recycler
           </a>
-          <a href="#" className="hover:text-[#00ff00] transition-colors">
+          <a href="https://recycleminds.xyz/defi/" className="hover:text-[#00ff00] transition-colors">
             DeFi
           </a>
-          <a href="#" className="hover:text-[#00ff00] transition-colors">
+          <a href="https://recycleminds.xyz/loja/" className="hover:text-[#00ff00] transition-colors">
             Rewards Store
           </a>
         </nav>

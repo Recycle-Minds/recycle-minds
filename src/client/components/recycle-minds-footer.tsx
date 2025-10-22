@@ -18,37 +18,37 @@ export function RecycleMindsFooter() {
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://x.com/recycle_minds" className="text-[#999999] hover:text-white transition-colors">
               <Twitter className="h-6 w-6" />
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://www.instagram.com/recycle_minds/" className="text-[#999999] hover:text-white transition-colors">
               <Instagram className="h-6 w-6" />
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://www.youtube.com/@RecycleMindsTV" className="text-[#999999] hover:text-white transition-colors">
               <Youtube className="h-6 w-6" />
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://t.me/head_RecycleMinds" className="text-[#999999] hover:text-white transition-colors">
               <Send className="h-6 w-6" />
             </a>
           </div>
 
           <nav className="flex flex-col gap-2 text-sm">
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://recycleminds.xyz/" className="text-[#999999] hover:text-white transition-colors">
               Home
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://recycleminds.xyz/headcoin/ " className="text-[#999999] hover:text-white transition-colors">
               $HEAD
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://recycleminds.xyz/mindsbr/" className="text-[#999999] hover:text-white transition-colors">
               NFT Collections
             </a>
-            <a href="#" className="text-[#00ff00] hover:text-[#00dd00] transition-colors">
+            <a href="https://app.recycleminds.xyz/" className="text-[#00ff00] hover:text-[#00dd00] transition-colors">
               Digital Recycler
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://recycleminds.xyz/defi/" className="text-[#999999] hover:text-white transition-colors">
               DeFi
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a href="https://recycleminds.xyz/loja/" className="text-[#999999] hover:text-white transition-colors">
               Rewards Store
             </a>
           </nav>
