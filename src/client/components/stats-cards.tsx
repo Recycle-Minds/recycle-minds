@@ -8,19 +8,22 @@ import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useState, useEffect } from 'react'
 import { StatsService } from '@/lib/stats-service'
+import { useNFTs } from '@/hooks/use-nfts'
+import { getAssociatedTokenAddress } from '@solana/spl-token'
 
 export function StatsCards() {
   const { publicKey } = useWallet()
   const { connection } = useConnection()
   const { userStats, globalStats } = useStats()
+  const { nfts } = useNFTs()
   const [recoverableSOL, setRecoverableSOL] = useState(0)
+  const [burnableSOL, setBurnableSOL] = useState(0)
 
   useEffect(() => {
     const fetchRecoverableSOL = async () => {
       if (!publicKey) return
 
       try {
-        console.log('Fetching token accounts for:', publicKey.toString())
         const response = await fetch(`/api/token-accounts?owner=${encodeURIComponent(publicKey.toString())}`)
         
         if (!response.ok) {
@@ -28,7 +31,6 @@ export function StatsCards() {
         }
 
         const data = await response.json()
-        console.log('Token accounts API response:', data)
         
         if (data.error) {
           throw new Error(`API error: ${data.error}`)
@@ -36,8 +38,6 @@ export function StatsCards() {
 
         const emptyAccountsCount = data.emptyAccountsCount || 0
         const recoverable = StatsService.calculateRecoverableSOL(emptyAccountsCount)
-        console.log('Empty accounts count:', emptyAccountsCount)
-        console.log('Recoverable SOL:', recoverable)
         setRecoverableSOL(recoverable)
       } catch (error) {
         console.error('Error fetching recoverable SOL:', error)
@@ -47,6 +47,53 @@ export function StatsCards() {
 
     fetchRecoverableSOL()
   }, [publicKey])
+
+  // Calculate SOL recoverable from burning NFTs
+  useEffect(() => {
+    const calculateBurnableSOL = async () => {
+      if (!publicKey || !nfts?.length) {
+        setBurnableSOL(0)
+        return
+      }
+
+      try {
+        let totalLamports = 0n
+        const addressesToCheck: string[] = []
+        
+        for (const nft of nfts) {
+          if (nft.interface === 'MplCoreAsset') {
+            addressesToCheck.push(nft.mint)
+          } else {
+            const mintPk = new PublicKey(nft.mint)
+            const ata = await getAssociatedTokenAddress(mintPk, publicKey, true)
+            addressesToCheck.push(ata.toString())
+          }
+        }
+        
+        if (addressesToCheck.length > 0) {
+          const response = await fetch(`/api/account-info?addresses=${addressesToCheck.join(',')}`)
+          if (response.ok) {
+            const data = await response.json()
+            if (data.results) {
+              for (const result of data.results) {
+                if (result.accountInfo) {
+                  totalLamports += BigInt(result.accountInfo.lamports)
+                }
+              }
+            }
+          }
+        }
+        
+        const sol = Number(totalLamports) / 1_000_000_000
+        setBurnableSOL(sol)
+      } catch (error) {
+        console.error('Error calculating burnable SOL:', error)
+        setBurnableSOL(0)
+      }
+    }
+
+    calculateBurnableSOL()
+  }, [publicKey, nfts])
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -133,7 +180,7 @@ export function StatsCards() {
           
           {/* Total SOL */}
           <div className="text-3xl font-bold text-teal-400 mb-3">
-            {publicKey ? (recoverableSOL + userStats.solClaimed).toFixed(6) : '0.000000'}
+            {publicKey ? (recoverableSOL + burnableSOL).toFixed(6) : '0.000000'}
           </div>
           
           {/* Breakdown */}
@@ -144,7 +191,7 @@ export function StatsCards() {
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-teal-300/80">From burns:</span>
-              <span className="text-teal-300 font-semibold">{publicKey ? userStats.solClaimed.toFixed(6) : '0.000000'}</span>
+              <span className="text-teal-300 font-semibold">{publicKey ? burnableSOL.toFixed(6) : '0.000000'}</span>
             </div>
           </div>
         </div>
