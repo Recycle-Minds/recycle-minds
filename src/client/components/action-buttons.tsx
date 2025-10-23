@@ -22,14 +22,18 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
       <div className="relative mb-8">
         {/* Tab Container with Background */}
         <div className="relative bg-[#0f0f0f] rounded-2xl p-2 border border-[#292929] backdrop-blur-sm">
-          {/* Active Tab Background */}
-          <div 
-            className="absolute top-2 bottom-2 bg-gradient-to-r from-[#00ff00]/20 to-[#00ff00]/10 rounded-xl transition-all duration-500 ease-out"
-            style={{
-              left: `${tabs.findIndex(tab => tab.id === activeTab) * (100 / tabs.length)}%`,
-              width: `${100 / tabs.length}%`,
-            }}
-          />
+        {/* Active Tab Background */}
+        <div 
+          className={`absolute top-2 bottom-2 rounded-xl transition-all duration-500 ease-out ${
+            activeTab === "claim-sol" 
+              ? "bg-gradient-to-r from-teal-500/20 to-teal-500/10" 
+              : "bg-gradient-to-r from-[#00ff00]/20 to-[#00ff00]/10"
+          }`}
+          style={{
+            left: `${tabs.findIndex(tab => tab.id === activeTab) * (100 / tabs.length)}%`,
+            width: `${100 / tabs.length}%`,
+          }}
+        />
           
           {/* Tab Buttons */}
           <div className="relative flex">
@@ -44,14 +48,16 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
                   disabled={isDisabled}
                   className={`
                     relative flex-1 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ease-out
-                    ${isActive 
-                      ? 'text-[#00ff00] font-semibold' 
-                      : isDisabled
-                      ? 'text-gray-500 cursor-not-allowed'
-                      : tab.color === 'teal'
-                      ? 'text-teal-400 hover:text-teal-300'
-                      : 'text-gray-400 hover:text-[#00ff00]'
-                    }
+                  ${isActive 
+                    ? tab.color === 'teal' 
+                      ? 'text-teal-300 font-semibold'
+                      : 'text-[#00ff00] font-semibold'
+                    : isDisabled
+                    ? 'text-gray-500 cursor-not-allowed'
+                    : tab.color === 'teal'
+                    ? 'text-teal-400 hover:text-teal-300'
+                    : 'text-gray-400 hover:text-[#00ff00]'
+                  }
                   `}
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
