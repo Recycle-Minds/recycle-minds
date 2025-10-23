@@ -22,7 +22,7 @@ export default function Page() {
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
       <RecycleMindsHeader />
 
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8 pt-24">
         {activeTab !== "why-recycle" && <StatsCards />}
         <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
         {activeTab === "digital-recycler" ? (
