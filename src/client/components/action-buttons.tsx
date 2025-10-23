@@ -12,8 +12,8 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
   const tabs = [
     { id: "why-recycle", label: "Why Recycle?", color: "green" },
     { id: "digital-recycler", label: "Digital Recycler", color: "green" },
-    { id: "recycling-history", label: "History", color: "green" },
     { id: "view-collection", label: "View Collection", color: "gray" },
+    { id: "recycling-history", label: "History", color: "green" },
     { id: "claim-sol", label: "Claim SOL", color: "teal" }
   ]
 
@@ -59,18 +59,18 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
                     {(tab.id === "digital-recycler" || tab.id === "claim-sol") && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <HelpCircle className="h-4 w-4 text-gray-400 hover:text-[#00ff00] transition-colors" />
+                          <HelpCircle className="h-4 w-4 text-teal hover:text-[#00ff00] transition-colors" />
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-xs">
                           {tab.id === "digital-recycler" ? (
                             <div className="space-y-2">
-                              <p className="font-semibold text-[#00ff00]">Digital Recycler</p>
+                              <p className={`font-semibold ${activeTab === "digital-recycler" ? 'text-[#00ff00]' : 'text-white'}`}>Digital Recycler</p>
                               <p>Burn your unused NFTs to recover SOL rent. This process is <span className="text-red-400 font-semibold">irreversible</span> - once burned, NFTs cannot be recovered.</p>
                               <p className="text-xs text-gray-400">The SOL comes from the rent paid when creating NFT accounts on Solana.</p>
                             </div>
                           ) : (
                             <div className="space-y-2">
-                              <p className="font-semibold text-teal-400">Claim SOL</p>
+                              <p className={`font-semibold ${activeTab === "claim-sol" ? 'text-teal-300' : 'text-white'}`}>Claim SOL</p>
                               <p>Close empty token accounts to recover SOL rent. This process is <span className="text-green-400 font-semibold">reversible</span> - you can recreate accounts later.</p>
                               <p className="text-xs text-gray-400">Empty accounts are created when you receive tokens but later send them all away.</p>
                             </div>
