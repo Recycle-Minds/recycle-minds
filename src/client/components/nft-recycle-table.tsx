@@ -165,7 +165,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Collection</th>
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Network</th>
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Owned NFTs</th>
-                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">
+                <th className="text-left py-4 pl-6 pr-1 text-[#00ff00] font-semibold text-base">
                   <div className="flex items-center gap-2">
                     SOL to recover
                     <Tooltip>
@@ -182,14 +182,14 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                     </Tooltip>
                   </div>
                 </th>
-                <th className="text-center py-4 px-6 text-[#00ff00] font-semibold text-base">Actions</th>
+                <th className="text-center py-4 pl-1 pr-6 text-[#00ff00] font-semibold text-base">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCollections.map((collection) => (
                   <tr key={collection.mint} className="border-b border-[#292929] last:border-b-0 hover:bg-gradient-to-r hover:from-[#00ff00]/5 hover:to-transparent transition-all duration-300 group">
                     <td className="py-4 px-6">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         <div className="relative">
                           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-lg">
                             {collection.image ? (
@@ -219,13 +219,13 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <span className="text-white font-bold text-lg">{collection.count}</span>
                         <span className="text-gray-400 text-sm">NFTs</span>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
+                    <td className="py-4 pl-6 pr-1">
+                      <div className="flex items-center gap-3">
                         <span className="text-white font-bold text-lg">
                           {(() => {
                             const key: string = collection.collection?.address || collection.mint
@@ -236,20 +236,18 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                         <span className="text-gray-400 text-sm">SOL</span>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="flex justify-end gap-3">
+                    <td className="py-4 pl-1 pr-6">
+                      <div className="flex justify-center gap-3">
                         <Button
-                          variant="outline"
                           size="sm"
-                          className="bg-[#00ff00] text-white hover:bg-[#00dd00] border-[#292929] px-4 py-2 font-bold rounded-lg transition-all duration-300"
+                          className="bg-[#0d330d] text-white hover:bg-[#1a4d1a] border border-[#00ff00] px-4 py-2 font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(0,255,0,0.3)]"
                           onClick={() => handleViewCollection(collection.collection?.address || collection.mint)}
                         >
                           View Collection
                         </Button>
                         <Button
-                          variant="outline"
                           size="sm"
-                          className="bg-[#00ff00] text-white hover:bg-[#00dd00] border-[#292929] px-4 py-2 font-bold rounded-lg transition-all duration-300"
+                          className="bg-[#0d330d] text-white hover:bg-[#1a4d1a] border border-[#00ff00] px-4 py-2 font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(0,255,0,0.3)]"
                           onClick={() => handleRecycleAll(collection.collection?.address || collection.mint)}
                           disabled={burningCollections.includes(collection.collection?.address || collection.mint)}
                         >
