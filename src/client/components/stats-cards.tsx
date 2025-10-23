@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { Layers, Battery, Trophy, Leaf } from "lucide-react"
+import { Layers, Battery, Trophy, Leaf, HelpCircle } from "lucide-react"
 import { useStats } from "@/hooks/use-stats"
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useConnection } from '@solana/wallet-adapter-react'
@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react'
 import { StatsService } from '@/lib/stats-service'
 import { useNFTs } from '@/hooks/use-nfts'
 import { getAssociatedTokenAddress } from '@solana/spl-token'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function StatsCards() {
   const { publicKey } = useWallet()
@@ -96,7 +97,8 @@ export function StatsCards() {
   }, [publicKey, nfts])
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+    <TooltipProvider>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
       <Card className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-0 p-6 shadow-2xl shadow-black/50 hover:shadow-3xl hover:shadow-black/60 transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full">
         <div>
           <div className="flex items-center gap-3 mb-4">
@@ -175,7 +177,24 @@ export function StatsCards() {
             <div className="p-2 rounded-lg bg-teal-400/20 backdrop-blur-sm">
               <Layers className="h-8 w-8 text-teal-400" />
             </div>
-            <span className="text-gray-300 text-sm font-medium">SOL to Claim</span>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-300 text-sm font-medium">SOL to Claim</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-4 w-4 text-teal-400 hover:text-teal-300 transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-sm">
+                  <div className="space-y-2">
+                    <p className="font-semibold text-teal-400">SOL to Claim Breakdown</p>
+                    <div className="space-y-1 text-xs">
+                      <p><span className="text-teal-300 font-semibold">Empty Accounts:</span> SOL from closing empty token accounts (reversible)</p>
+                      <p><span className="text-teal-300 font-semibold">From Recycling:</span> SOL from burning NFTs (irreversible)</p>
+                    </div>
+                    <p className="text-xs text-gray-400">Empty accounts are created when you receive tokens but later send them all away. The SOL comes from rent paid when creating accounts on Solana.</p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
           
           {/* Total SOL */}
@@ -200,6 +219,7 @@ export function StatsCards() {
           {publicKey ? 'Total available to claim' : 'Connect wallet to see SOL'}
         </div>
       </Card>
-    </div>
+      </div>
+    </TooltipProvider>
   )
 }

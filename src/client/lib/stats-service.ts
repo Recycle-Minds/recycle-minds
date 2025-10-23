@@ -132,7 +132,7 @@ export class StatsService {
 
   // Calculate CO2 saved (estimated)
   static calculateCO2Saved(nftValue: number): number {
-    // Fixed per-action saving: 0.00268 grams CO2e per burn/claim
+    // Fixed per-action saving: 0.00268 grams CO2e per recycle
     return 0.00268
   }
 

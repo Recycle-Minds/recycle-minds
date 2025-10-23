@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, ChevronDown, Loader2 } from "lucide-react"
+import { Search, ChevronDown, Loader2, HelpCircle } from "lucide-react"
 import { useNFTs } from "@/hooks/use-nfts"
 import { useRecycling } from "@/hooks/use-recycling"
 import { useWalletInfo } from "@/hooks/use-wallet-info"
@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { PublicKey } from "@solana/web3.js"
 import { getAssociatedTokenAddress } from "@solana/spl-token"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface NFTRecycleTableProps {
   onViewCollection?: (collectionAddress: string) => void
@@ -127,7 +128,8 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
   }
 
   return (
-    <div>
+    <TooltipProvider>
+      <div>
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -160,11 +162,27 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#292929]">
-                <th className="text-left py-4 px-6 text-white font-semibold text-base">Collection</th>
-                <th className="text-left py-4 px-6 text-white font-semibold text-base">Network</th>
-                <th className="text-left py-4 px-6 text-white font-semibold text-base">Owned NFTs</th>
-                <th className="text-left py-4 px-6 text-white font-semibold text-base">SOL to recover</th>
-                <th className="text-center py-4 px-6 text-white font-semibold text-base">Actions</th>
+                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Collection</th>
+                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Network</th>
+                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Owned NFTs</th>
+                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">
+                  <div className="flex items-center gap-2">
+                    SOL to recover
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-[#00ff00] hover:text-[#00dd00] transition-colors cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-sm">
+                        <div className="space-y-2">
+                          <p className="font-semibold text-[#00ff00]">SOL to Recover</p>
+                          <p>This shows the SOL you can recover by burning NFTs in this collection. The SOL comes from the rent paid when creating NFT accounts on Solana.</p>
+                          <p className="text-xs text-gray-400">When you burn an NFT, you get back the SOL that was locked as rent for that account. This process is irreversible.</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </th>
+                <th className="text-center py-4 px-6 text-[#00ff00] font-semibold text-base">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -253,6 +271,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </TooltipProvider>
   )
 }
