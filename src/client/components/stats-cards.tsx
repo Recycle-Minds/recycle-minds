@@ -110,7 +110,7 @@ export function StatsCards() {
           </div>
           <div className="text-xs text-gray-300 bg-[#1a1a1a] rounded-lg p-2 border border-[#292929]">
             <div className="font-medium text-white mb-1">Calculation:</div>
-            <div className="text-gray-400">0.00268 points per burn/claim</div>
+            <div className="text-gray-400">0.00268 points per recycle</div>
             <div className="text-gray-500 mt-1">Based on <a href="https://climate.solana.com/" target="_blank" rel="noopener noreferrer" className="text-[#00ff00] hover:underline">Solana Climate</a></div>
           </div>
         </div>
@@ -160,7 +160,7 @@ export function StatsCards() {
           </div>
           <div className="text-xs text-gray-300 bg-[#1a1a1a] rounded-lg p-2 border border-[#292929]">
             <div className="font-medium text-white mb-1">Calculation:</div>
-            <div className="text-gray-400">0.00268 gCO₂e per burn/claim</div>
+            <div className="text-gray-400">0.00268 gCO₂e per recycle</div>
             <div className="text-gray-500 mt-1">Based on <a href="https://climate.solana.com/" target="_blank" rel="noopener noreferrer" className="text-[#00ff00] hover:underline">Solana Climate</a></div>
           </div>
         </div>
@@ -190,7 +190,7 @@ export function StatsCards() {
               <span className="text-teal-300 font-semibold">{publicKey ? recoverableSOL.toFixed(6) : '0.000000'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-teal-300/80">From burns:</span>
+              <span className="text-teal-300/80">From recycling:</span>
               <span className="text-teal-300 font-semibold">{publicKey ? burnableSOL.toFixed(6) : '0.000000'}</span>
             </div>
           </div>

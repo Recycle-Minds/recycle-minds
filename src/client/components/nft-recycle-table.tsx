@@ -183,7 +183,9 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-black"></div>
                         </div>
                         <div>
-                          <span className="text-white font-semibold text-base">{collection.name}</span>
+                          <span className="text-white font-semibold text-base">
+                            {collection.name.length > 13 ? `${collection.name.substring(0, 13)}...` : collection.name}
+                          </span>
                           <div className="text-xs text-gray-400">NFT Collection</div>
                         </div>
                       </div>
