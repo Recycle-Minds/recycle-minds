@@ -7,15 +7,9 @@ export function RecycleMindsHeader() {
     <header className="border-b border-[#292929] bg-[#0a0a0a]">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center">
-            <svg viewBox="0 0 40 40" className="h-full w-full">
-              <rect x="15" y="5" width="10" height="10" fill="#00ff00" rx="2" />
-              <rect x="5" y="15" width="10" height="10" fill="#00ff00" rx="2" />
-              <rect x="25" y="15" width="10" height="10" fill="#00ff00" rx="2" />
-              <rect x="15" y="25" width="10" height="10" fill="#00ff00" rx="2" />
-            </svg>
-          </div>
-          <span className="text-xl font-bold">RecycleMinds</span>
+          <a href="https://app.recycleminds.xyz" className="flex w-40 items-center justify-center hover:opacity-80 transition-opacity">
+            <img src="/recycle_minds_logo.png" alt="RecycleMinds" className="h-full w-full object-contain" />
+          </a>
         </div>
 
         <nav className="hidden items-center gap-6 text-sm md:flex">

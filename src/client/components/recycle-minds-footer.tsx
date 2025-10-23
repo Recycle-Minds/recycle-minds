@@ -1,38 +1,35 @@
-import { Twitter, Instagram, Youtube, Linkedin, Send } from "lucide-react"
+import Image from "next/image"
 
 export function RecycleMindsFooter() {
   return (
     <footer className="border-t border-[#292929] bg-black mt-20">
       <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          <div className="flex items-center gap-2">
-            <div className="flex h-12 w-12 items-center justify-center">
-              <svg viewBox="0 0 40 40" className="h-full w-full">
-                <rect x="15" y="5" width="10" height="10" fill="#00ff00" rx="2" />
-                <rect x="5" y="15" width="10" height="10" fill="#00ff00" rx="2" />
-                <rect x="25" y="15" width="10" height="10" fill="#00ff00" rx="2" />
-                <rect x="15" y="25" width="10" height="10" fill="#00ff00" rx="2" />
-              </svg>
-            </div>
-            <span className="text-2xl font-bold">RecycleMinds</span>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+          <div className="flex items-center gap-2 md:w-1/3">
+            <a href="https://app.recycleminds.xyz" className="flex h-60 w-60 items-center justify-center hover:opacity-80 transition-opacity">
+              <img src="/recycle_minds_logo.png" alt="RecycleMinds" className="h-full w-full object-contain" />
+            </a>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-center gap-6 md:w-1/3">
             <a href="https://x.com/recycle_minds" className="text-[#999999] hover:text-white transition-colors">
-              <Twitter className="h-6 w-6" />
+              <Image src="/logo_social_x.png" alt="X" width={24} height={24} className="h-6 w-6" />
             </a>
             <a href="https://www.instagram.com/recycle_minds/" className="text-[#999999] hover:text-white transition-colors">
-              <Instagram className="h-6 w-6" />
+              <Image src="/logo_social_instagram.png" alt="Instagram" width={24} height={24} className="h-6 w-6" />
             </a>
             <a href="https://www.youtube.com/@RecycleMindsTV" className="text-[#999999] hover:text-white transition-colors">
-              <Youtube className="h-6 w-6" />
+              <Image src="/logo_social_youtube.png" alt="YouTube" width={24} height={24} className="h-6 w-6" />
+            </a>
+            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+              <Image src="/logo_social_linkedin.png" alt="LinkedIn" width={24} height={24} className="h-6 w-6" />
             </a>
             <a href="https://t.me/head_RecycleMinds" className="text-[#999999] hover:text-white transition-colors">
-              <Send className="h-6 w-6" />
+              <Image src="/logo_social_telegram.png" alt="Telegram" width={24} height={24} className="h-6 w-6" />
             </a>
           </div>
 
-          <nav className="flex flex-col gap-2 text-sm">
+          <nav className="flex flex-col gap-2 text-sm md:w-1/3 md:items-end">
             <a href="https://recycleminds.xyz/" className="text-[#999999] hover:text-white transition-colors">
               Home
             </a>
