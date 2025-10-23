@@ -1,12 +1,13 @@
 "use client"
 
 import { useWallet } from '@solana/wallet-adapter-react'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { Button } from '@/components/ui/button'
 import { Wallet, LogOut } from 'lucide-react'
 
 export function WalletButton() {
   const { connected, publicKey, disconnect } = useWallet()
+  const { setVisible } = useWalletModal()
 
   if (connected && publicKey) {
     return (
@@ -14,7 +15,8 @@ export function WalletButton() {
         <Button
           onClick={disconnect}
           variant="outline"
-          className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black"
+          size="sm"
+          className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black px-4 py-2"
         >
           <LogOut className="mr-2 h-4 w-4" />
           {`${publicKey.toString().slice(0, 4)}...${publicKey.toString().slice(-4)}`}
@@ -24,9 +26,14 @@ export function WalletButton() {
   }
 
   return (
-    <WalletMultiButton className="!bg-[#00ff00] !text-black hover:!bg-[#00dd00] !font-medium !rounded-md">
+    <Button
+      onClick={() => setVisible(true)}
+      variant="outline"
+      size="sm"
+      className="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black px-4 py-2"
+    >
       <Wallet className="mr-2 h-4 w-4" />
       Connect Wallet
-    </WalletMultiButton>
+    </Button>
   )
 }
