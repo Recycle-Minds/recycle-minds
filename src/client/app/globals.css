@@ -75,7 +75,7 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
+  --font-sans: var(--font-poppins), 'Poppins', 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -121,5 +121,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-poppins), 'Poppins', 'Geist', 'Geist Fallback', sans-serif;
+  }
+  html {
+    font-family: var(--font-poppins), 'Poppins', 'Geist', 'Geist Fallback', sans-serif;
   }
 }
