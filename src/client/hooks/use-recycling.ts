@@ -14,7 +14,7 @@ import toast from 'react-hot-toast'
 import { getAsset } from '@/lib/das-api'
 
 export function useRecycling() {
-  const { burnNFT, getNFTsByCollection } = useNFTs()
+  const { burnNFT, getNFTsByCollection, fetchNFTs } = useNFTs()
   const { isConnected } = useWalletInfo()
   const { publicKey, sendTransaction, wallet } = useWallet()
   const { connection } = useConnection()
@@ -135,6 +135,10 @@ export function useRecycling() {
         toast.success(`Successfully burned ${burnedMints.length} NFT(s)! Check your wallet and history.`, {
           duration: 4000
         })
+        
+        // Auto-refresh NFT list after successful burns
+        console.log('Auto-refreshing NFT list after burn...')
+        await fetchNFTs()
       } else {
         toast.error('Failed to burn any NFTs. Please try again.', {
           duration: 5000
@@ -258,6 +262,11 @@ export function useRecycling() {
       setBurnedNFTs(prev => [...prev, mintAddress])
       
       toast.success('NFT burned successfully!', { id: `burn-${mintAddress}` })
+      
+      // Auto-refresh NFT list after successful burn
+      console.log('Auto-refreshing NFT list after single burn...')
+      await fetchNFTs()
+      
       return true
     } catch (err) {
       console.error(`Failed to burn NFT ${mintAddress}:`, err)
@@ -297,6 +306,11 @@ export function useRecycling() {
       const signature = await sendTransaction(tx, connection)
       
       toast.success(`Successfully closed ${closedAccounts.length} empty account(s)!`, { id: 'cleanup-claim' })
+      
+      // Auto-refresh NFT list to update stats cards
+      console.log('Auto-refreshing NFT list after claim...')
+      await fetchNFTs()
+      
       return { signature, closed: closedAccounts.length }
     } catch (err) {
       console.error('Failed to close empty accounts:', err)
@@ -335,6 +349,11 @@ export function useRecycling() {
       const signature = await sendTransaction(tx, connection)
       
       toast.success(`Successfully closed ${closedAccounts.length} selected account(s)!`, { id: 'cleanup-selected' })
+      
+      // Auto-refresh NFT list to update stats cards
+      console.log('Auto-refreshing NFT list after claim selected...')
+      await fetchNFTs()
+      
       return { signature, closed: closedAccounts.length }
     } catch (err) {
       console.error('Failed to close selected accounts:', err)
