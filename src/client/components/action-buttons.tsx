@@ -10,21 +10,21 @@ interface ActionButtonsProps {
 
 export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
   const tabs = [
-    { id: "why-recycle", label: "Why Recycle?", color: "green" },
-    { id: "digital-recycler", label: "Digital Recycler", color: "green" },
-    { id: "view-collection", label: "View Collection", color: "gray" },
-    { id: "recycling-history", label: "History", color: "green" },
-    { id: "claim-sol", label: "Empty Accounts", color: "teal" }
+    { id: "why-recycle", label: "Why Recycle?", shortLabel: "Why?", color: "green" },
+    { id: "digital-recycler", label: "Digital Recycler", shortLabel: "Recycler", color: "green" },
+    { id: "view-collection", label: "View Collection", shortLabel: "Collection", color: "gray" },
+    { id: "recycling-history", label: "History", shortLabel: "History", color: "green" },
+    { id: "claim-sol", label: "Empty Accounts", shortLabel: "Claim", color: "teal" }
   ]
 
   return (
     <TooltipProvider>
       <div className="relative mb-8">
         {/* Tab Container with Background */}
-        <div className="relative bg-[#0f0f0f] rounded-2xl p-2 border border-[#292929] backdrop-blur-sm">
+        <div className="relative bg-[#0f0f0f] rounded-2xl p-1 sm:p-2 border border-[#292929] backdrop-blur-sm">
         {/* Active Tab Background */}
         <div 
-          className={`absolute top-2 bottom-2 rounded-xl transition-all duration-500 ease-out ${
+          className={`absolute top-1 bottom-1 sm:top-2 sm:bottom-2 rounded-xl transition-all duration-500 ease-out ${
             activeTab === "claim-sol" 
               ? "bg-gradient-to-r from-teal-500/20 to-teal-500/10" 
               : "bg-gradient-to-r from-[#00ff00]/20 to-[#00ff00]/10"
@@ -36,7 +36,7 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
         />
           
           {/* Tab Buttons */}
-          <div className="relative flex">
+          <div className="relative flex overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id
               const isDisabled = tab.id === "view-collection" && activeTab !== "view-collection"
@@ -47,7 +47,7 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
                   onClick={() => !isDisabled && onTabChange(tab.id as any)}
                   disabled={isDisabled}
                   className={`
-                    relative flex-1 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ease-out
+                    relative flex-1 min-w-0 px-2 sm:px-4 py-2 sm:py-3 rounded-xl font-medium text-xs sm:text-sm transition-all duration-300 ease-out whitespace-nowrap
                   ${isActive 
                     ? tab.color === 'teal' 
                       ? 'text-teal-300 font-semibold'
@@ -60,12 +60,13 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
                   }
                   `}
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {tab.label}
+                  <span className="relative z-10 flex items-center justify-center gap-1 sm:gap-2">
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.shortLabel}</span>
                     {(tab.id === "digital-recycler" || tab.id === "claim-sol") && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <HelpCircle className="h-4 w-4 text-teal hover:text-[#00ff00] transition-colors" />
+                          <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4 text-teal hover:text-[#00ff00] transition-colors" />
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-xs">
                           {tab.id === "digital-recycler" ? (

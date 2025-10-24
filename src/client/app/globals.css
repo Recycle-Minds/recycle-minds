@@ -127,3 +127,13 @@
     font-family: var(--font-poppins), 'Poppins', 'Geist', 'Geist Fallback', sans-serif;
   }
 }
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
