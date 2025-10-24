@@ -1,7 +1,8 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { Layers, Battery, Trophy, Leaf, HelpCircle } from "lucide-react"
+import { HelpCircle } from "lucide-react"
+import Image from "next/image"
 import { useStats } from "@/hooks/use-stats"
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useConnection } from '@solana/wallet-adapter-react'
@@ -102,8 +103,14 @@ export function StatsCards() {
       <Card className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-0 p-6 shadow-2xl shadow-black/50 hover:shadow-3xl hover:shadow-black/60 transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-[#00ff00]/10 backdrop-blur-sm">
-              <Trophy className="h-8 w-8 text-[#00ff00]" />
+            <div className="p-2 rounded-lg backdrop-blur-sm">
+              <Image 
+                src="/icon_dashboard_earned_points.png" 
+                alt="Earned Points" 
+                width={32} 
+                height={32} 
+                className="h-8 w-8"
+              />
             </div>
             <span className="text-gray-400 text-sm font-medium">Earned Points</span>
           </div>
@@ -124,8 +131,14 @@ export function StatsCards() {
       <Card className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-0 p-6 shadow-2xl shadow-black/50 hover:shadow-3xl hover:shadow-black/60 transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-[#00ff00]/10 backdrop-blur-sm">
-              <Battery className="h-8 w-8 text-[#00ff00]" />
+            <div className="p-2 rounded-lg backdrop-blur-sm">
+              <Image 
+                src="/icon_dashboard_points.png" 
+                alt="My Recycled NFTs" 
+                width={32} 
+                height={32} 
+                className="h-8 w-8"
+              />
             </div>
             <span className="text-gray-400 text-sm font-medium">My Recycled NFTs</span>
           </div>
@@ -152,8 +165,14 @@ export function StatsCards() {
       <Card className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-0 p-6 shadow-2xl shadow-black/50 hover:shadow-3xl hover:shadow-black/60 transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-[#00ff00]/10 backdrop-blur-sm">
-              <Leaf className="h-8 w-8 text-[#00ff00]" />
+            <div className="p-2 rounded-lg backdrop-blur-sm">
+              <Image 
+                src="/icon_dashboard_co2.png" 
+                alt="Global CO2 Saved" 
+                width={32} 
+                height={32} 
+                className="h-8 w-8"
+              />
             </div>
             <span className="text-gray-400 text-sm font-medium">Global CO₂ Saved</span>
           </div>
@@ -174,8 +193,14 @@ export function StatsCards() {
       <Card className="bg-gradient-to-br from-teal-900/80 to-teal-950/80 border-0 p-6 shadow-2xl shadow-teal-900/30 hover:shadow-3xl hover:shadow-teal-900/40 transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm flex flex-col justify-between h-full">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-teal-400/20 backdrop-blur-sm">
-              <Layers className="h-8 w-8 text-teal-400" />
+            <div className="p-2 rounded-lg backdrop-blur-sm">
+              <Image 
+                src="/icon_dashboard_solana.png" 
+                alt="SOL to Claim" 
+                width={32} 
+                height={32} 
+                className="h-8 w-8"
+              />
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-300 text-sm font-medium">SOL to Claim</span>
