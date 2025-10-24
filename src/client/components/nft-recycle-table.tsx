@@ -28,6 +28,36 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
     collection.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  // Helper to get NFT type label
+  const getNFTTypeLabel = (collectionKey: string) => {
+    const inCol = (nfts || []).filter((n: any) => {
+      if (collectionKey === n.mint) return true
+      return n.collection?.address === collectionKey
+    })
+    
+    if (inCol.length === 0) return 'Unknown'
+    
+    // Count each interface type
+    const typeCounts: Record<string, number> = {}
+    inCol.forEach((nft: any) => {
+      const type = nft.interface || 'Unknown'
+      typeCounts[type] = (typeCounts[type] || 0) + 1
+    })
+    
+    // Get the most common type
+    const mostCommonType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0][0]
+    
+    // Convert to friendly labels
+    const typeLabels: Record<string, string> = {
+      'MplCoreAsset': 'Core',
+      'ProgrammableNFT': 'pNFT',
+      'V1_NFT': 'Legacy',
+      'MplCoreCollection': 'Core Collection'
+    }
+    
+    return typeLabels[mostCommonType] || mostCommonType
+  }
+
   // Compute real SOL recoverable per collection by summing lamports in token/core accounts
   useEffect(() => {
     if (!isConnected || !publicKey || !connection || !collections?.length) return
@@ -163,6 +193,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
               <thead>
                 <tr className="border-b border-[#292929]">
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Collection</th>
+                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Type</th>
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Network</th>
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Owned NFTs</th>
                 <th className="text-left py-4 pl-6 pr-1 text-[#00ff00] font-semibold text-base">
@@ -206,6 +237,13 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                           </span>
                           <div className="text-xs text-gray-400">NFT Collection</div>
                         </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#00ff00]/20 to-[#00dd00]/10 text-[#00ff00] border border-[#00ff00]/30">
+                          {getNFTTypeLabel(collection.collection?.address || collection.mint)}
+                        </span>
                       </div>
                     </td>
                     <td className="py-4 px-6">
