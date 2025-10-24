@@ -5,6 +5,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const owner = searchParams.get('owner')
+    const limit = parseInt(searchParams.get('limit') || '1000')
+    const format = searchParams.get('format') || 'detailed' // 'detailed' or 'addresses'
     
     if (!owner) {
       return NextResponse.json({ error: 'Owner address is required' }, { status: 400 })
@@ -23,27 +25,35 @@ export async function GET(request: NextRequest) {
       programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
     })
 
-    // Filter for empty accounts
-    const emptyAccounts = tokenAccounts.value.filter((acc) => {
-      try {
-        const info: any = acc.account.data.parsed.info
-        const amount = info.tokenAmount?.uiAmount || 0
-        return amount === 0
-      } catch {
-        return false
-      }
-    })
+    // Filter for empty accounts and apply limit
+    const emptyAccounts = tokenAccounts.value
+      .filter((acc) => {
+        try {
+          const info: any = acc.account.data.parsed.info
+          const amount = info.tokenAmount?.uiAmount || 0
+          return amount === 0
+        } catch {
+          return false
+        }
+      })
+      .slice(0, limit)
 
-    // Format the response
-    const formattedAccounts = emptyAccounts.map(acc => ({
-      address: acc.pubkey.toString(),
-      mint: acc.account.data.parsed.info.mint,
-      owner: acc.account.data.parsed.info.owner,
-      amount: 0,
-      decimals: acc.account.data.parsed.info.tokenAmount.decimals
-    }))
-
-    return NextResponse.json({ emptyAccounts: formattedAccounts })
+    // Return based on format
+    if (format === 'addresses') {
+      // Return just the addresses for buildCleanupTransaction
+      const addresses = emptyAccounts.map(acc => acc.pubkey.toString())
+      return NextResponse.json({ emptyAccounts: addresses })
+    } else {
+      // Return detailed information for UI display
+      const formattedAccounts = emptyAccounts.map(acc => ({
+        address: acc.pubkey.toString(),
+        mint: acc.account.data.parsed.info.mint,
+        owner: acc.account.data.parsed.info.owner,
+        amount: 0,
+        decimals: acc.account.data.parsed.info.tokenAmount.decimals
+      }))
+      return NextResponse.json({ emptyAccounts: formattedAccounts })
+    }
   } catch (error) {
     console.error('Error fetching empty accounts:', error)
     return NextResponse.json({ error: 'Failed to fetch empty accounts' }, { status: 500 })

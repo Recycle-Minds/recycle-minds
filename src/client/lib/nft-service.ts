@@ -556,32 +556,31 @@ export class NFTService {
   // Build a cleanup transaction that closes up to `limit` empty token accounts
   async buildCleanupTransaction(owner: PublicKey, limit: number = 10): Promise<{ tx: Transaction; closedAccounts: PublicKey[] }> {
     this.log('Building cleanup transaction for owner:', owner.toString())
-    const parsed = await this.connection.getParsedTokenAccountsByOwner(owner, { programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') })
-
-    const emptyAccounts = parsed.value
-      .filter((acc) => {
-        try {
-          const info: any = acc.account.data.parsed.info
-          const amount = info.tokenAmount?.uiAmount || 0
-          return amount === 0
-        } catch {
-          return false
-        }
-      })
-      .slice(0, limit)
+    
+    // Use server-side API to get empty accounts (keeps Helius API key secure)
+    const response = await fetch(`/api/empty-accounts?owner=${owner.toString()}&limit=${limit}&format=addresses`)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch empty accounts: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    const emptyAccounts = data.emptyAccounts || []
+    
+    this.log('Found empty accounts from server:', emptyAccounts.length)
 
     const tx = new Transaction()
     const closed: PublicKey[] = []
 
-    for (const acc of emptyAccounts) {
+    for (const accAddress of emptyAccounts) {
+      const accPubkey = new PublicKey(accAddress)
       tx.add(createCloseAccountInstruction(
-        acc.pubkey,
+        accPubkey,
         owner,
         owner,
         [],
         TOKEN_PROGRAM_ID
       ))
-      closed.push(acc.pubkey)
+      closed.push(accPubkey)
     }
 
     this.log('Prepared close instructions for accounts:', closed.length)
