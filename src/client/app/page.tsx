@@ -10,6 +10,7 @@ import { RecyclingHistoryTable } from "@/components/recycling-history-table"
 import { ClaimSolView } from "@/components/claim-sol-view"
 import { WhyRecycleLanding } from "@/components/why-recycle-landing"
 import { RewardsStore } from "@/components/rewards-store"
+import { WhyRecycleBanner } from "@/components/why-recycle-banner"
 import { RecycleMindsFooter } from "@/components/recycle-minds-footer"
 import { Toaster } from "react-hot-toast"
 
@@ -25,6 +26,7 @@ export default function Page() {
 
       <main className="flex-1 container mx-auto px-4 py-8 pt-24">
         {activeTab !== "why-recycle" && <StatsCards />}
+        {activeTab === "why-recycle" && <WhyRecycleBanner />}
         <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
         {activeTab === "digital-recycler" ? (
           <NFTRecycleTable onViewCollection={(collectionAddress) => {
