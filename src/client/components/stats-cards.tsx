@@ -241,7 +241,7 @@ export function StatsCards() {
         </div>
         
         <div className="text-xs text-gray-300 mt-3 pt-2 border-t border-teal-400/20">
-          {publicKey ? 'Total available to claim' : 'Connect wallet to see SOL'}
+          Total available to claim
         </div>
       </Card>
       </div>
