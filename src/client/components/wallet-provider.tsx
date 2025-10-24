@@ -18,13 +18,10 @@ export function WalletContextProvider({ children }: WalletContextProviderProps) 
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
   const network = WalletAdapterNetwork.Mainnet
 
-  // Use Helius RPC with API key for all client-side operations
+  // Use a public RPC endpoint for wallet adapter (only for wallet connection)
+  // All actual RPC calls go through server-side API routes with HELIUS_API_KEY
   const endpoint = useMemo(() => {
-    const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY
-    if (!heliusApiKey) {
-      throw new Error('NEXT_PUBLIC_HELIUS_API_KEY is required but not set')
-    }
-    return `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
+    return 'https://api.mainnet-beta.solana.com'
   }, [network])
 
   const wallets = useMemo(

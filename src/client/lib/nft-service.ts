@@ -55,14 +55,9 @@ export class NFTService {
   private debug: boolean
 
   constructor(connection?: Connection, debug: boolean = true) {
-    // Use Helius RPC with API key for all operations
-    const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY
-    if (heliusApiKey) {
-      this.connection = new Connection(`https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`)
-    } else {
-      // Fallback to provided connection or public RPC
-      this.connection = connection || new Connection('https://api.mainnet-beta.solana.com')
-    }
+    // Use provided connection (wallet adapter connection)
+    // All Helius RPC calls are made through server-side API routes
+    this.connection = connection || new Connection('https://api.mainnet-beta.solana.com')
     this.debug = debug
   }
 
@@ -393,14 +388,15 @@ export class NFTService {
   async burnProgrammableNFT(mintAddress: string, walletAdapter: any): Promise<string> {
     this.log('Burning pNFT via UMI for:', mintAddress)
     
-    // Use Helius RPC with API key
-    const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY
-    const heliusEndpoint = heliusApiKey 
-      ? `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
-      : this.connection.rpcEndpoint
+    // Get secure RPC endpoint from server (keeps Helius API key secure)
+    const endpointResponse = await fetch('/api/rpc-endpoint')
+    if (!endpointResponse.ok) {
+      throw new Error('Failed to get RPC endpoint')
+    }
+    const { endpoint } = await endpointResponse.json()
     
     // Create UMI instance with wallet adapter and token metadata plugin
-    const umi = createUmi(heliusEndpoint)
+    const umi = createUmi(endpoint)
       .use(mplTokenMetadata())
       .use(walletAdapterIdentity(walletAdapter))
     
@@ -414,14 +410,18 @@ export class NFTService {
       tokenStandard: 4 // 4 = ProgrammableNonFungible
     }
     
-    // Fetch collection info if available
+    // Fetch collection info if available (from server-side API)
     try {
-      const das = await getAsset(heliusEndpoint, mintAddress)
-      if (das?.grouping && das.grouping.length > 0) {
-        const collectionGroup = das.grouping.find((g: any) => g.group_key === 'collection')
-        if (collectionGroup?.group_value) {
-          burnParams.collection = umiPublicKey(collectionGroup.group_value)
-          this.log('Using collection for PNFT burn:', collectionGroup.group_value)
+      const assetResponse = await fetch(`/api/asset?id=${mintAddress}`)
+      if (assetResponse.ok) {
+        const data = await assetResponse.json()
+        const das = data.asset
+        if (das?.grouping && das.grouping.length > 0) {
+          const collectionGroup = das.grouping.find((g: any) => g.group_key === 'collection')
+          if (collectionGroup?.group_value) {
+            burnParams.collection = umiPublicKey(collectionGroup.group_value)
+            this.log('Using collection for PNFT burn:', collectionGroup.group_value)
+          }
         }
       }
     } catch (error) {
