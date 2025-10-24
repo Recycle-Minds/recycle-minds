@@ -69,6 +69,12 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
   }
 
   const selectedPoints = (selectedNFTs.length * 0.00268).toFixed(5)
+  
+  // Calculate total SOL recoverable from selected NFTs
+  // Each NFT token account recovery: ~0.00203928 SOL
+  // Each Core NFT asset account: ~0.002 SOL
+  const solPerNFT = 0.002 // Average SOL recovered per NFT
+  const totalSolRecoverable = (selectedNFTs.length * solPerNFT).toFixed(5)
 
   if (!isConnected) {
     return (
@@ -132,7 +138,7 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
               </label>
             </div>
 
-            {/* Center - Selected Points */}
+            {/* Center - Selected Points & SOL */}
             <div className="flex items-center gap-4">
               <span className="text-gray-400 text-sm">Selected:</span>
               <span className="text-white text-2xl font-bold">{selectedNFTs.length}</span>
@@ -140,6 +146,10 @@ export function NFTCollectionGrid({ collectionAddress }: NFTCollectionGridProps)
               <div className="w-px h-6 bg-gray-600"></div>
               <span className="text-gray-400 text-sm">Points:</span>
               <span className="text-white text-2xl font-bold">{selectedPoints}</span>
+              <div className="w-px h-6 bg-gray-600"></div>
+              <span className="text-gray-400 text-sm">SOL to Recover:</span>
+              <span className="text-[#00ff00] text-2xl font-bold">{totalSolRecoverable}</span>
+              <span className="text-[#00ff00] text-sm">◎</span>
             </div>
 
           {/* Right Side - Recycle Button */}
