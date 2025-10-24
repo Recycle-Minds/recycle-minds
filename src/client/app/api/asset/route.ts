@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
 
     const heliusApiKey = process.env.HELIUS_API_KEY
     if (!heliusApiKey) {
+      console.error('HELIUS_API_KEY environment variable is not set')
       return NextResponse.json({ error: 'Helius API key not configured' }, { status: 500 })
     }
 

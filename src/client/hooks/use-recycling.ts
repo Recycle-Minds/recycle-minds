@@ -43,7 +43,12 @@ export function useRecycling() {
           // Resolve authoritative interface via DAS to avoid misclassification
           let iface = nft.interface
           try {
-            const das = await getAsset(connection.rpcEndpoint, nft.mint)
+            // Use Helius RPC with API key for DAS calls
+            const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY
+            const heliusEndpoint = heliusApiKey 
+              ? `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
+              : connection.rpcEndpoint
+            const das = await getAsset(heliusEndpoint, nft.mint)
             if (das?.interface) iface = das.interface as any
           } catch {}
           
@@ -151,14 +156,24 @@ export function useRecycling() {
       // Resolve interface via DAS before building
       let iface: string = 'V1_NFT'
       try {
-        const das = await getAsset(connection.rpcEndpoint, mintAddress)
+        // Use Helius RPC with API key for DAS calls
+        const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY
+        const heliusEndpoint = heliusApiKey 
+          ? `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
+          : connection.rpcEndpoint
+        const das = await getAsset(heliusEndpoint, mintAddress)
         if (das?.interface) iface = das.interface as any
       } catch {}
 
       let signature: string | null = null
       if (iface === 'MplCoreAsset') {
         if (!wallet) throw new Error('Wallet adapter not ready')
-        const umi = createUmi(connection.rpcEndpoint)
+        // Use Helius RPC with API key for UMI
+        const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY
+        const heliusEndpoint = heliusApiKey 
+          ? `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`
+          : connection.rpcEndpoint
+        const umi = createUmi(heliusEndpoint)
           .use(walletAdapterIdentity((wallet as any)?.adapter))
           .use(mplCore())
         console.log('Sending Core burn via UMI for:', mintAddress)
