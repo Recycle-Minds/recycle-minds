@@ -9,13 +9,14 @@ import { NFTCollectionGrid } from "@/components/nft-collection-grid"
 import { RecyclingHistoryTable } from "@/components/recycling-history-table"
 import { ClaimSolView } from "@/components/claim-sol-view"
 import { WhyRecycleLanding } from "@/components/why-recycle-landing"
+import { RewardsStore } from "@/components/rewards-store"
 import { WhyRecycleBanner } from "@/components/why-recycle-banner"
 import { RecycleMindsFooter } from "@/components/recycle-minds-footer"
 import { Toaster } from "react-hot-toast"
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<
-    "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle"
+    "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle" | "rewards-store"
   >("digital-recycler")
   const [selectedCollection, setSelectedCollection] = useState<string | undefined>(undefined)
 
@@ -38,6 +39,8 @@ export default function Page() {
           <RecyclingHistoryTable />
         ) : activeTab === "claim-sol" ? (
           <ClaimSolView />
+        ) : activeTab === "rewards-store" ? (
+          <RewardsStore />
         ) : (
           <WhyRecycleLanding />
         )}
