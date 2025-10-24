@@ -23,10 +23,14 @@ export function StatsCards() {
 
   useEffect(() => {
     const fetchRecoverableSOL = async () => {
-      if (!publicKey) return
+      if (!publicKey) {
+        setRecoverableSOL(0)
+        return
+      }
 
       try {
-        const response = await fetch(`/api/token-accounts?owner=${encodeURIComponent(publicKey.toString())}`)
+        console.log('[StatsCards] Fetching empty accounts for SOL calculation...')
+        const response = await fetch(`/api/empty-accounts?owner=${encodeURIComponent(publicKey.toString())}&format=detailed`)
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -38,8 +42,9 @@ export function StatsCards() {
           throw new Error(`API error: ${data.error}`)
         }
 
-        const emptyAccountsCount = data.emptyAccountsCount || 0
-        const recoverable = StatsService.calculateRecoverableSOL(emptyAccountsCount)
+        const emptyAccounts = data.emptyAccounts || []
+        const recoverable = emptyAccounts.length * 0.00203928 // Rent per account
+        console.log('[StatsCards] Empty accounts found:', emptyAccounts.length, 'SOL recoverable:', recoverable)
         setRecoverableSOL(recoverable)
       } catch (error) {
         console.error('Error fetching recoverable SOL:', error)
@@ -48,17 +53,19 @@ export function StatsCards() {
     }
 
     fetchRecoverableSOL()
-  }, [publicKey])
+  }, [publicKey, nfts])
 
   // Calculate SOL recoverable from burning NFTs
   useEffect(() => {
     const calculateBurnableSOL = async () => {
       if (!publicKey || !nfts?.length) {
+        console.log('[StatsCards] No NFTs to calculate burnable SOL')
         setBurnableSOL(0)
         return
       }
 
       try {
+        console.log('[StatsCards] Calculating burnable SOL for', nfts.length, 'NFTs...')
         let totalLamports = 0n
         const addressesToCheck: string[] = []
         
@@ -71,6 +78,8 @@ export function StatsCards() {
             addressesToCheck.push(ata.toString())
           }
         }
+        
+        console.log('[StatsCards] Checking', addressesToCheck.length, 'addresses for SOL...')
         
         if (addressesToCheck.length > 0) {
           const response = await fetch(`/api/account-info?addresses=${addressesToCheck.join(',')}`)
@@ -87,6 +96,7 @@ export function StatsCards() {
         }
         
         const sol = Number(totalLamports) / 1_000_000_000
+        console.log('[StatsCards] Total burnable SOL calculated:', sol)
         setBurnableSOL(sol)
       } catch (error) {
         console.error('Error calculating burnable SOL:', error)
