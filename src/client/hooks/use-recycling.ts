@@ -82,10 +82,16 @@ export function useRecycling() {
             const res = await burnV1(umi, burnParams).sendAndConfirm(umi)
             signature = res.signature.toString()
             console.log('Core burn sent, signature:', signature)
+          } else if (iface === 'ProgrammableNFT') {
+            // PNFTs require special handling via UMI (handles frozen accounts)
+            if (!wallet) throw new Error('Wallet adapter not ready')
+            console.log('Burning PNFT via UMI for:', nft.mint)
+            signature = await service.burnProgrammableNFT(nft.mint, (wallet as any)?.adapter)
+            console.log('PNFT burn sent, signature:', signature)
           } else {
-            // Handle undefined interface by trying different NFT types
+            // Handle V1_NFT or undefined interface
             let tx
-            const interfaces = iface ? [iface] : ['ProgrammableNFT', 'V1_NFT']
+            const interfaces = iface ? [iface] : ['V1_NFT']
             for (const interfaceType of interfaces) {
               try {
                 const nftWithInterface = { ...nft, interface: interfaceType }
