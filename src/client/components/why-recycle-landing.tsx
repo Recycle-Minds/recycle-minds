@@ -5,209 +5,170 @@ import Image from "next/image"
 export function WhyRecycleLanding() {
   return (
     <div className="space-y-16">
-      {/* Hero Section */}
-      <div className="relative h-[200px] rounded-lg overflow-hidden mb-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#00ff00] to-[#00aa00] opacity-20" />
-        <Image src="/digital-tech-circuit-pattern-green.jpg" alt="Digital recycling hero" fill className="object-cover" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-4xl font-bold text-white text-center">
-            Welcome to the World&apos;s First Digital Recycler
-          </h1>
-        </div>
-        {/* Carousel dots */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          <div className="w-2 h-2 rounded-full bg-white" />
-          <div className="w-2 h-2 rounded-full bg-white/50" />
-          <div className="w-2 h-2 rounded-full bg-white/50" />
-        </div>
-      </div>
 
       {/* Recycle Your NFTs Section */}
       <div className="text-center space-y-8">
-        <div>
-          <h2 className="text-4xl font-bold text-[#00ff00] mb-2">Recycle your NFTs</h2>
-          <p className="text-xl text-gray-400">When digital trash comes to life.</p>
+        <div className="my-20">
+          <h2 className="text-5xl font-medium text-[#00ff00] mb-2">Recycle your NFTs</h2>
+          <p className="text-3xl text-[#fff]">Turning digital waste into new value.</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[53%_auto] gap-12 items-center w-full mb-20">
           {/* Left side - Logo and slogan */}
-          <div className="flex flex-col items-center space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="grid grid-cols-2 gap-1">
-                <div className="w-12 h-12 bg-[#00ff00] rounded" />
-                <div className="w-12 h-12 bg-[#00ff00] rounded" />
-                <div className="w-12 h-12 bg-[#00ff00] rounded" />
-                <div className="w-12 h-12 bg-transparent rounded" />
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white">NO DEGEN</div>
-              <div className="text-3xl font-bold text-[#00ff00]">YES PURPOSE</div>
-              <div className="text-xl text-white mt-2">RecycleMinds</div>
-            </div>
+          <div className="flex flex-col items-center space-y-4 relative rounded-lg overflow-hidden">
+            <Image
+              src="/img_no_degen_yes_purpose.jpg"
+              alt="Digital trash pile"
+              width={1200}
+              height={800}
+              className="w-full h-auto rounded-lg object-cover"
+            />
           </div>
 
           {/* Right side - Description */}
           <div className="text-left space-y-4">
-            <p className="text-[#00ff00] text-lg font-semibold">
-              We believe that every NFT should have a reason to exist. NFT without purpose is digital trash.
+            <p className="text-[#00ff00] text-3xl font-medium">
+              We believe every NFT should have a reason to exist. An NFT without purpose is nothing but digital waste.
             </p>
-            <p className="text-gray-300">
-              At <span className="text-white font-semibold">RecycleMinds</span>, we create a{" "}
-              <span className="text-white">Non-Degen</span> culture, which wins life with the advancement of digital
-              recycling. A platform where trash is transformed into value, and you participate in a conscious digital
-              movement, transparent and with a positive impact.
+            <p className="text-gray-300 break-words text-[20px]">
+              At Recycle Minds, we are building a Non Degen culture that comes to life with the launch of the Digital Recycler, a platform where your NFTs gain new utility, are redefined in meaning and become part of a solid, transparent and purpose driven ecosystem.
             </p>
           </div>
         </div>
       </div>
 
       {/* Environmental Impact Section */}
-      <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-        {/* Left side - Text */}
-        <div className="space-y-4">
-          <h3 className="text-2xl font-bold text-[#00ff00]">Millions of NFTs are created without real utility.</h3>
-          <p className="text-gray-300">
-            This occupation of space in blockchains generates unnecessary transactions, each one consuming energy and
-            emitting CO₂, even in low-impact networks.
-          </p>
-          <p className="text-[#00ff00] text-lg font-semibold">
-            Result: accumulated digital trash + growing environmental damage.
-          </p>
-        </div>
 
-        {/* Right side - Image */}
-        <div className="relative h-[300px] rounded-lg overflow-hidden">
-          <Image src="/digital-trash-pile-colorful-nft-waste.jpg" alt="Digital trash pile" fill className="object-cover" />
-        </div>
-      </div>
-
-      {/* On-chain Recycling Section */}
-      <div className="space-y-8">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-[#00ff00] mb-4">On-chain Recycling</h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Each recycled NFT generates points, which can be exchanged for $HEAD tokens, exclusive badges, or special
-            products.
-          </p>
-        </div>
-
-        <div className="relative h-[400px] rounded-lg overflow-hidden max-w-5xl mx-auto">
-          <Image src="/futuristic-recycling-machine-with-green-recycle-sy.jpg" alt="Futuristic recycling machine" fill className="object-cover" />
-        </div>
-      </div>
-
-      {/* Benefits Section */}
-      <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {/* Measurable Impact */}
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full border-2 border-[#00ff00] flex items-center justify-center">
-              <Clock className="w-8 h-8 text-[#00ff00]" />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-[45%_auto] gap-12 items-center w-full">
+          {/* Left side - Text */}
+          <div className="space-y-4">
+            <p className="text-[#00ff00] text-3xl font-medium">Millions of NFTs are created without real utility.</p>
+            <p className="text-gray-300 break-words my-10 text-[20px]">
+             They take up space in wallets and generate unnecessary transactions, each consuming energy and emitting CO₂ even on low impact networks.
+            </p>
+            <p className="text-lg font-medium text-[20px]">
+              <span className="text-[#00ff00]">The result:</span> accumulated digital waste and increasing environmental damage.
+            </p>
           </div>
-          <h3 className="text-xl font-bold text-[#00ff00]">Measurable Impact</h3>
-          <p className="text-gray-300 text-sm">
-            On our platform, you track the reduction of digital trash and carbon emissions in a clear and transparent
-            way.
-          </p>
-        </div>
 
-        {/* Benefits for Users */}
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full border-2 border-[#00ff00] flex items-center justify-center">
-              <Gift className="w-8 h-8 text-[#00ff00]" />
-            </div>
-          </div>
-          <h3 className="text-xl font-bold text-[#00ff00]">Benefits for Users</h3>
-          <p className="text-gray-300 text-sm">
-            Accumulate points, exchange for $HEAD tokens, participate in exclusive launches, and be part of a conscious
-            non-degen community.
-          </p>
-        </div>
-
-        {/* Benefits for the World */}
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full border-2 border-[#00ff00] flex items-center justify-center">
-              <Globe className="w-8 h-8 text-[#00ff00]" />
-            </div>
-          </div>
-          <h3 className="text-xl font-bold text-[#00ff00]">Benefits for the World</h3>
-          <p className="text-gray-300 text-sm">
-            Each destroyed NFT is a transference of value. Less trash in the digital space, more space for innovation.
-          </p>
-        </div>
-      </div>
-
-      {/* Multichain Section */}
-      <div className="text-center space-y-6">
-        <p className="text-xl text-gray-300">
-          <span className="text-[#00ff00] font-semibold">Natively Multichain</span> - It operates on Polygon, Ethereum,
-          Solana and Base. New integrations are on the way.
-        </p>
-        <div className="flex justify-center items-center gap-8 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-purple-600 rounded" />
-            <span className="text-white font-semibold">polygon</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gray-400 rounded-full" />
-            <span className="text-white font-semibold">ethereum</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-purple-400 rounded" />
-            <span className="text-white font-semibold">SOLANA</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded" />
-            <span className="text-white font-semibold">base</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Solana Rescue Section */}
-      <div className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-[#00ff00] mb-4">Here you also rescue Solana</h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Our platform is located at SOL locked in previous transactions and returns it instantly to your wallet,
-            without complications.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto items-center">
-          {/* Left side - Image */}
+          {/* Right side - Image */}
           <div className="relative h-[400px] rounded-lg overflow-hidden">
-            <Image src="/hand-holding-solana-coins-tokens-cryptocurrency.jpg" alt="Hand holding Solana tokens" fill className="object-cover" />
+            <Image src="/img_junk_nft.jpg" alt="Digital trash pile" fill className="object-cover" />
+          </div>
+        </div>
+
+        {/* On-chain Recycling Section */}
+        <div className="mb-6">
+          <div className="text-center my-20">
+            <h2 className="text-5xl font-medium text-[#00ff00] mb-2">On-chain Recycling</h2>
+            <p className="max-w-5xl mx-auto text-3xl text-[#fff]">
+              Each recycled NFT earns points, which can be exchanged for $HEAD tokens, exclusive badges, or special products.
+            </p>
           </div>
 
-          {/* Right side - Claim Box */}
-          <div className="bg-[#00ff00] text-black p-8 rounded-lg space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-purple-600 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-xs">SOL</span>
+          <div className="relative w-full rounded-lg overflow-hidden mx-auto">
+            <Image
+              src="/img_recycler.jpg"
+              alt="Futuristic recycling machine"
+              width={1632}
+              height={642}
+              className="w-full h-auto rounded-lg object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Benefits Section */}
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          <div className="bg-card text-card-foreground gap-6 rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-0 p-6 shadow-2xl shadow-black/50 transition-all duration-300 hover:scale-[1.02] flex flex-col justify-center items-center h-full">
+              <div className="flex justify-center items-center rounded-lg overflow-hidden bg-gray-200n">
+                <Image src="/icon_measurable_impact.png" alt="Hand holding Solana tokens" width={120} height={120} className="object-contain" />
               </div>
-              <span className="text-2xl font-bold">SOLANA</span>
+              <p className="text-[#00ff00] text-3xl font-medium text-center">
+                Measurable Impact
+              </p>
+              <p className="text-gray-300 break-words text-center">
+                On our platform, you can track the reduction of digital waste and carbon emissions in a clear and transparent way.
+              </p>
+          </div>
+          <div className="bg-card text-card-foreground gap-6 rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-0 p-6 shadow-2xl shadow-black/50 transition-all duration-300 hover:scale-[1.02] flex flex-col justify-center items-center h-full">
+              <div className="flex justify-center items-center rounded-lg overflow-hidden bg-gray-200n">
+                <Image src="/icon_user_benefits.png" alt="Hand holding Solana tokens" width={120} height={120} className="object-contain" />
+              </div>
+              <p className="text-[#00ff00] text-3xl font-medium text-center">
+                Benefits for Users
+            </p>
+            <p className="text-gray-300 break-words text-center">
+              Earn points, exchange them for $HEAD tokens, unlock SOL tokens, and join a conscious Non Degen community.
+            </p>
+          </div>
+          <div className="bg-card text-card-foreground gap-6 rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-0 p-6 shadow-2xl shadow-black/50 transition-all duration-300 hover:scale-[1.02] flex flex-col justify-center items-center h-full">
+              <div className="flex justify-center items-center rounded-lg overflow-hidden bg-gray-200n">
+                <Image src="/icon_benefits_for_the_world.png" alt="Hand holding Solana tokens" width={120} height={120} className="object-contain" />
+              </div>
+              <p className="text-[#00ff00] text-3xl font-medium text-center">
+                Benefits for the World
+            </p>
+            <p className="text-gray-300 break-words text-center">
+              Each NFT destroyed prevents an unnecessary transfer. Less CO₂, less digital waste, and more room for innovation.
+            </p>
+          </div>
+        </div>
+
+        {/* Multichain Section */}
+        <div className="text-center space-y-6 mt-30">
+          <h2 className="text-[#00ff00] font-semibold text-[26px]  mb-2">Currently on Solana, Soon Multichain</h2>
+          <p className="text-[20px] text-gray-300">
+            We will soon bring our platform to Ethereum, Polygon, and Base, extending sustainability across multiple networks.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 items-center justify-items-center w-full">
+            {["solana", "ethereum", "polygon", "base"].map((name) => (
+              <div key={name} className="w-full flex justify-center items-center">
+                <Image
+                  src={`/logo_${name}.png`}
+                  alt={`${name} logo`}
+                  width={120}
+                  height={120}
+                  className="object-contain w-3/5 h-auto max-h-14"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Solana Rescue Section */}
+        <div className="space-y-6">
+          <div className="text-center my-25">
+            <h2 className="text-5xl font-medium text-[#00f292] mb-4">Here, you also unlock Solana</h2>
+            <p className="text-xl text-gray-300 max-w-4xl mx-auto">
+              Our platform finds SOL locked in previous NFT transactions and instantly returns it to your wallet, hassle free.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 w-full mx-auto items-stretch">
+            {/* Left side - Image */}
+            <div className="relative h-[590px] overflow-hidden">
+              <Image src="/img_solana_hands.png" alt="Hand holding Solana tokens" fill className="object-cover" />
             </div>
 
-            <div>
-              <h3 className="text-xl font-bold mb-4">
-                Release the SOL that was stuck in your transactions with tokens and NFTs. Connect your wallet, confirm
-                and rescue in a simple way:
-              </h3>
-              <ol className="space-y-2 text-sm">
-                <li>1 - Connect your wallet</li>
-                <li>2 - Confirm how much you can rescue</li>
-                <li>3 - Rescue with one click</li>
-              </ol>
-            </div>
+            {/* Right side - Claim Box */}
+            <div className="bg-[#01f092] text-black p-8 space-y-6 flex flex-col justify-center items-center">
+              <div>
+                <h3 className="text-[30px] font-medium mb-4 text-[#105116]">
+                  Unlock the SOL stuck in your NFT transactions. Connect your wallet and reclaim it quickly and securely.
+                </h3>
+                 <h3 className="text-[30px] font-medium mb-4] text-[#1f1f1f]">
+                  The NFTs you recycle on our platform release even more SOL for you to reclaim.
+                </h3>
+              </div>
 
-            <Button className="w-full bg-black text-[#00ff00] hover:bg-gray-900 text-lg py-6">Claim SOL</Button>
+              <Button className="w-[80%] h-[80px] bg-[#152b26] text-white hover:bg-gray-900 text-[30px] rounded-lg mt-20">
+                  Unlock SOL
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+       
   )
 }
