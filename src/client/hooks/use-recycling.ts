@@ -158,13 +158,18 @@ export function useRecycling() {
     try {
       // Build and send real transaction on mainnet
       const service = new NFTService(connection)
+      
       // Resolve interface via DAS before building (use server-side API)
       let iface: string = 'V1_NFT'
+      let nftData: any = null
       try {
         const response = await fetch(`/api/asset?id=${mintAddress}`)
         if (response.ok) {
           const data = await response.json()
-          if (data.asset?.interface) iface = data.asset.interface as any
+          if (data.asset) {
+            nftData = data.asset
+            if (data.asset?.interface) iface = data.asset.interface as any
+          }
         }
       } catch {}
 
@@ -178,51 +183,78 @@ export function useRecycling() {
         }
         const { endpoint } = await endpointResponse.json()
         
+        // Use UMI with secure server-provided endpoint (same as burnCollection)
         const umi = createUmi(endpoint)
           .use(walletAdapterIdentity((wallet as any)?.adapter))
           .use(mplCore())
+        
         console.log('Sending Core burn via UMI for:', mintAddress)
-        const res = await burnV1(umi, { asset: umiPublicKey(mintAddress) }).sendAndConfirm(umi)
-        signature = res.signature
-        console.log('Core burn sent, signature:', signature)
-      } else {
-        // Try pNFT first, then V1_NFT
-        let tx
-        const interfaces = ['ProgrammableNFT', 'V1_NFT']
-        for (const t of interfaces) {
-          try {
-            tx = await service.buildBurnTransactionAuto({
-              mint: mintAddress,
-              owner: publicKey.toString(),
-              name: 'Unknown NFT',
-              symbol: '',
-              image: '/placeholder.jpg',
-              interface: t,
-              burnt: false
-            } as any, publicKey)
-            break
-          } catch (err) {
-            if (t === interfaces[interfaces.length - 1]) throw err
+        
+        // Build burn parameters with collection if available (same as burnCollection)
+        const burnParams: any = { asset: umiPublicKey(mintAddress) }
+        
+        // Add collection if the NFT has one
+        if (nftData?.grouping && nftData.grouping.length > 0) {
+          const collectionGroup = nftData.grouping.find((g: any) => g.group_key === 'collection')
+          if (collectionGroup?.group_value) {
+            burnParams.collection = umiPublicKey(collectionGroup.group_value)
+            console.log('Using collection for burn:', collectionGroup.group_value)
           }
         }
-        if (!tx) throw new Error('Failed to build transaction')
+        
+        const res = await burnV1(umi, burnParams).sendAndConfirm(umi)
+        signature = res.signature.toString()
+        console.log('Core burn sent, signature:', signature)
+      } else if (iface === 'ProgrammableNFT') {
+        // PNFTs require special handling via UMI (same as burnCollection)
+        if (!wallet) throw new Error('Wallet adapter not ready')
+        console.log('Burning PNFT via UMI for:', mintAddress)
+        signature = await service.burnProgrammableNFT(mintAddress, (wallet as any)?.adapter)
+        console.log('PNFT burn sent, signature:', signature)
+      } else {
+        // Handle V1_NFT or undefined interface (same as burnCollection)
+        let tx
+        const interfaces = iface ? [iface] : ['V1_NFT']
+        for (const interfaceType of interfaces) {
+          try {
+            const nftWithInterface = {
+              mint: mintAddress,
+              owner: publicKey.toString(),
+              name: nftData?.content?.metadata?.name || 'Unknown NFT',
+              symbol: nftData?.content?.metadata?.symbol || '',
+              image: nftData?.content?.files?.[0]?.uri || '/placeholder.jpg',
+              interface: interfaceType,
+              burnt: false
+            }
+            tx = await service.buildBurnTransactionAuto(nftWithInterface as any, publicKey)
+            break
+          } catch (err) {
+            console.log(`Failed to build transaction for ${mintAddress} with interface ${interfaceType}:`, err)
+            if (interfaceType === interfaces[interfaces.length - 1]) throw err
+          }
+        }
+        if (!tx) throw new Error('Failed to build transaction for any interface type')
         tx.feePayer = publicKey
-        // Get latest blockhash from server-side API
-      const blockhashResponse = await fetch('/api/latest-blockhash')
-      if (!blockhashResponse.ok) {
-        throw new Error(`Failed to get latest blockhash: ${blockhashResponse.status}`)
-      }
-      const { blockhash } = await blockhashResponse.json()
-      tx.recentBlockhash = blockhash
-        const sig = await sendTransaction(tx, connection)
-        console.log('Burn tx sent:', sig)
-        signature = sig
+        console.log('Sending burn transaction for:', mintAddress)
+        signature = await sendTransaction(tx, connection)
+        console.log('Transaction sent, signature:', signature)
+        await connection.confirmTransaction(signature, 'confirmed')
+        console.log('Transaction confirmed for:', mintAddress)
       }
 
-      // Verify then update stats
-      const ok = await service.verifyBurnSuccess(mintAddress, publicKey, iface)
-      if (!ok) throw new Error('On-chain verification failed: asset still present or not burned')
-      await service.updateStatsAfterBurn(mintAddress, publicKey, 'Unknown NFT', '/placeholder.jpg', 'Unknown Collection')
+      // Verify on-chain that the asset is actually gone (same as burnCollection)
+      const verifier = new NFTService(connection)
+      const ok = await verifier.verifyBurnSuccess(mintAddress, publicKey, iface)
+      if (!ok) {
+        throw new Error('On-chain verification failed: asset still present or not burned')
+      }
+
+      // Update stats after verified burn (same as burnCollection)
+      const nftName = nftData?.content?.metadata?.name || 'Unknown NFT'
+      const nftImage = nftData?.content?.files?.[0]?.uri || '/placeholder.jpg'
+      const collectionName = nftData?.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown Collection'
+      await verifier.updateStatsAfterBurn(mintAddress, publicKey, nftName, nftImage, collectionName)
+      
       setBurnedNFTs(prev => [...prev, mintAddress])
       
       toast.success('NFT burned successfully!', { id: `burn-${mintAddress}` })
