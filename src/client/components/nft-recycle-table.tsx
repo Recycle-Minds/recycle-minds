@@ -24,9 +24,29 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
   const [burningCollections, setBurningCollections] = useState<string[]>([])
   const [realSolByCollection, setRealSolByCollection] = useState<Record<string, number>>({})
 
-  const filteredCollections = collections.filter(collection =>
-    collection.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Filter out Legacy NFT collections and apply search filter
+  const filteredCollections = collections.filter(collection => {
+    // First check if it matches search term
+    const matchesSearch = collection.name.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    // Then check if it's a Legacy-only collection
+    const collectionKey = collection.collection?.address || collection.mint
+    const isLegacyOnly = (() => {
+      if (!nfts || nfts.length === 0) return false
+      
+      const collectionNFTs = nfts.filter((n: any) => {
+        if (collectionKey === n.mint) return true
+        return n.collection?.address === collectionKey
+      })
+      
+      if (collectionNFTs.length === 0) return false
+      
+      // Check if all NFTs in collection are Legacy
+      return collectionNFTs.every((nft: any) => nft.interface === 'V1_NFT')
+    })()
+    
+    return matchesSearch && !isLegacyOnly
+  })
 
   // Helper to get NFT type label
   const getNFTTypeLabel = (collectionKey: string) => {
@@ -181,9 +201,15 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
         <div className="text-center py-16">
           <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-12 shadow-2xl shadow-black/50 border border-[#292929]">
             <h3 className="text-2xl font-bold text-gray-300 mb-4">No Collections Found</h3>
-            <p className="text-gray-500 text-lg">
-              {searchTerm ? 'Try adjusting your search terms' : 'You don\'t have any NFT collections yet'}
+            <p className="text-gray-500 text-lg mb-4">
+              {searchTerm ? 'Try adjusting your search terms' : 'You don\'t have any burnable NFT collections yet'}
             </p>
+            <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#292929]">
+              <p className="text-sm text-gray-400">
+                <span className="font-medium text-[#00ff00]">Note:</span> Legacy NFTs (V1_NFT) are not displayed as they cannot be burned reliably. 
+                Only Core and pNFT collections are shown here.
+              </p>
+            </div>
           </div>
         </div>
       ) : (
@@ -193,7 +219,27 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
               <thead>
                 <tr className="border-b border-[#292929]">
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Collection</th>
-                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Type</th>
+                <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">
+                  <div className="flex items-center gap-2">
+                    Type
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-[#00ff00] hover:text-[#00dd00] transition-colors cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-sm">
+                        <div className="space-y-2">
+                          <p className="font-semibold text-[#00ff00]">NFT Types</p>
+                          <div className="space-y-1 text-sm">
+                            <p><span className="font-medium">Core:</span> New Metaplex Core NFTs (supported)</p>
+                            <p><span className="font-medium">pNFT:</span> Programmable NFTs (supported)</p>
+                            <p><span className="font-medium">Legacy:</span> Old V1 NFTs (not supported)</p>
+                          </div>
+                          <p className="text-xs text-gray-400">Legacy NFTs are not displayed as they cannot be burned reliably.</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </th>
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Network</th>
                 <th className="text-left py-4 px-6 text-[#00ff00] font-semibold text-base">Owned NFTs</th>
                 <th className="text-left py-4 pl-6 pr-1 text-[#00ff00] font-semibold text-base">
