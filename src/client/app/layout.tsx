@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   title: "RecycleMinds - NFT Recycling Platform",
   description: "Recycle your NFTs and earn rewards while saving the planet",
   generator: "v0.app",
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  }
 }
 
 export default function RootLayout({
