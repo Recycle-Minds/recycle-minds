@@ -19,7 +19,7 @@ export default function Page() {
   const [selectedCollection, setSelectedCollection] = useState<string | undefined>(undefined)
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+    <div className="min-h-screen bg-[#1f1f1f] text-white flex flex-col">
       <RecycleMindsHeader />
 
       <main className="flex-1 container mx-auto px-4 py-8 pt-24">
