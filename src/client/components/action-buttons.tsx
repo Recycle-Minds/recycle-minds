@@ -14,7 +14,7 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
     { id: "digital-recycler", label: "Digital Recycler", color: "green" },
     { id: "view-collection", label: "View Collection", color: "gray" },
     { id: "recycling-history", label: "History", color: "green" },
-    { id: "claim-sol", label: "Claim SOL", color: "teal" }
+    { id: "claim-sol", label: "Empty Accounts", color: "teal" }
   ]
 
   return (
