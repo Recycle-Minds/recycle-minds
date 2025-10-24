@@ -4,14 +4,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { HelpCircle } from "lucide-react"
 
 interface ActionButtonsProps {
-  activeTab: "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle"
-  onTabChange: (tab: "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle") => void
+  activeTab: "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle" | "rewards-store"
+  onTabChange: (tab: "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle" | "rewards-store") => void
 }
 
 export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
   const tabs = [
     { id: "why-recycle", label: "Why Recycle?", shortLabel: "Why?", color: "green" },
     { id: "digital-recycler", label: "Digital Recycler", shortLabel: "Recycler", color: "green" },
+    { id: "rewards-store", label: "Rewards Store", shortLabel: "Rewards", color: "green" },
     { id: "view-collection", label: "View Collection", shortLabel: "Collection", color: "gray" },
     { id: "recycling-history", label: "History", shortLabel: "History", color: "green" },
     { id: "claim-sol", label: "Empty Accounts", shortLabel: "Claim", color: "teal" }
