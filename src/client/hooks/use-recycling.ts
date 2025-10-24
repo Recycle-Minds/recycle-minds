@@ -50,12 +50,23 @@ export function useRecycling() {
           let signature: string | null = null
           if (iface === 'MplCoreAsset') {
             if (!wallet) throw new Error('Wallet adapter not ready')
-            // Use UMI official Core burn with proper program repository
-            const umi = createUmi(connection.rpcEndpoint)
+            // Use UMI official Core burn with Helius RPC
+            const umi = createUmi('https://mainnet.helius-rpc.com/?api-key=')
               .use(walletAdapterIdentity((wallet as any)?.adapter))
               .use(mplCore())
             console.log('Sending Core burn via UMI for:', nft.mint)
-            const res = await burnV1(umi, { asset: umiPublicKey(nft.mint) }).sendAndConfirm(umi)
+            console.log('NFT collection info:', nft.collection)
+            
+            // Build burn parameters with collection if available
+            const burnParams: any = { asset: umiPublicKey(nft.mint) }
+            
+            // Add collection if the NFT has one
+            if (nft.collection?.address) {
+              burnParams.collection = umiPublicKey(nft.collection.address)
+              console.log('Using collection for burn:', nft.collection.address)
+            }
+            
+            const res = await burnV1(umi, burnParams).sendAndConfirm(umi)
             signature = res.signature
             console.log('Core burn sent, signature:', signature)
           } else {
