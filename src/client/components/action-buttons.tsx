@@ -22,10 +22,10 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
     <TooltipProvider>
       <div className="relative mb-8">
         {/* Tab Container with Background */}
-        <div className="relative bg-[#0f0f0f] rounded-2xl p-1 sm:p-2 border border-[#292929] backdrop-blur-sm">
+        <div className="relative bg-[#0f0f0f] rounded-2xl p-0 border border-[#292929] backdrop-blur-sm">
         {/* Active Tab Background */}
         <div 
-          className={`absolute top-1 bottom-1 sm:top-2 sm:bottom-2 rounded-xl transition-all duration-500 ease-out ${
+          className={`absolute top-0 bottom-0 rounded-xl transition-all duration-500 ease-out ${
             activeTab === "claim-sol" 
               ? "bg-gradient-to-r from-teal-500/20 to-teal-500/10" 
               : "bg-gradient-to-r from-[#00ff00]/20 to-[#00ff00]/10"
@@ -48,7 +48,7 @@ export function ActionButtons({ activeTab, onTabChange }: ActionButtonsProps) {
                   onClick={() => !isDisabled && onTabChange(tab.id as any)}
                   disabled={isDisabled}
                   className={`
-                    relative flex-1 min-w-0 px-2 sm:px-4 py-2 sm:py-3 rounded-xl font-medium text-xs sm:text-sm transition-all duration-300 ease-out whitespace-nowrap
+                    relative flex-1 min-w-0 px-3 sm:px-4 py-3 sm:py-4 rounded-xl font-medium text-xs sm:text-sm transition-all duration-300 ease-out whitespace-nowrap
                   ${isActive 
                     ? tab.color === 'teal' 
                       ? 'text-teal-300 font-semibold'
