@@ -115,11 +115,11 @@ export function StatsCards() {
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg backdrop-blur-sm">
               <Image 
-                src="/icon_dashboard_earned_points.png" 
+                src="/dashboard_points_icon.png" 
                 alt="Earned Points" 
                 width={32} 
                 height={32} 
-                className="h-8 w-8"
+                className="h-12 w-12"
               />
             </div>
             <span className="text-gray-400 text-sm font-medium">Earned Points</span>
@@ -143,11 +143,11 @@ export function StatsCards() {
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg backdrop-blur-sm">
               <Image 
-                src="/icon_dashboard_points.png" 
+                src="/dashboard_nfts_icon.png" 
                 alt="My Recycled NFTs" 
                 width={32} 
                 height={32} 
-                className="h-8 w-8"
+                className="h-12 w-12"
               />
             </div>
             <span className="text-gray-400 text-sm font-medium">My Recycled NFTs</span>
@@ -177,11 +177,11 @@ export function StatsCards() {
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg backdrop-blur-sm">
               <Image 
-                src="/icon_dashboard_co2.png" 
+                src="/dashboard_co2_icon.png" 
                 alt="Global CO2 Saved" 
                 width={32} 
                 height={32} 
-                className="h-8 w-8"
+                className="h-12 w-12"
               />
             </div>
             <span className="text-gray-400 text-sm font-medium">Global CO₂ Saved</span>
@@ -205,11 +205,11 @@ export function StatsCards() {
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg backdrop-blur-sm">
               <Image 
-                src="/icon_dashboard_solana.png" 
+                src="/dashboard_solana_icon.png" 
                 alt="SOL to Claim" 
                 width={32} 
                 height={32} 
-                className="h-8 w-8"
+                className="h-12 w-12"
               />
             </div>
             <div className="flex items-center gap-2">

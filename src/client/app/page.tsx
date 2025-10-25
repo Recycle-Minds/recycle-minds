@@ -25,9 +25,19 @@ export default function Page() {
       <RecycleMindsHeader />
 
       <main className="flex-1 container mx-auto px-4 py-8 pt-24">
-        {activeTab !== "why-recycle" && <StatsCards />}
-        {activeTab === "why-recycle" && <WhyRecycleBanner />}
-        <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Mobile: Show tabs first, then stats */}
+        <div className="block md:hidden">
+          <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
+          {activeTab !== "why-recycle" && <StatsCards />}
+          {activeTab === "why-recycle" && <WhyRecycleBanner />}
+        </div>
+        
+        {/* Desktop: Show stats first, then tabs */}
+        <div className="hidden md:block">
+          {activeTab !== "why-recycle" && <StatsCards />}
+          {activeTab === "why-recycle" && <WhyRecycleBanner />}
+          <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
         {activeTab === "digital-recycler" ? (
           <NFTRecycleTable onViewCollection={(collectionAddress) => {
             setSelectedCollection(collectionAddress)

@@ -9,6 +9,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { PublicKey } from "@solana/web3.js"
 import { getAssociatedTokenAddress } from "@solana/spl-token"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Image from "next/image"
 
 interface NFTRecycleTableProps {
   onViewCollection?: (collectionAddress: string) => void
@@ -292,14 +293,15 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
                         </span>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-10">
                       <div className="flex items-center gap-3">
-                        <div className="flex flex-col gap-0.5">
-                          <div className="w-4 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 rounded" />
-                          <div className="w-4 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 rounded" />
-                          <div className="w-4 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 rounded" />
-                        </div>
-                        <span className="text-white font-medium">Solana</span>
+                        <Image 
+                          src="/icon_dashboard_solana.png" 
+                          alt="Earned Points" 
+                          width={32} 
+                          height={32} 
+                          className="h-4 w-5"
+                        />
                       </div>
                     </td>
                     <td className="py-4 px-6">
