@@ -42,7 +42,7 @@ export default function Page() {
         ) : activeTab === "rewards-store" ? (
           <RewardsStore />
         ) : (
-          <WhyRecycleLanding />
+          <WhyRecycleLanding onNavigateToRecycler={() => setActiveTab("digital-recycler")} />
         )}
       </main>
 

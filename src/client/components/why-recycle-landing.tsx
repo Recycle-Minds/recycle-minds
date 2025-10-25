@@ -2,7 +2,11 @@ import { Button } from "@/components/ui/button"
 import { Clock, Gift, Globe } from "lucide-react"
 import Image from "next/image"
 
-export function WhyRecycleLanding() {
+interface WhyRecycleLandingProps {
+  onNavigateToRecycler?: () => void
+}
+
+export function WhyRecycleLanding({ onNavigateToRecycler }: WhyRecycleLandingProps) {
   return (
     <div className="space-y-16">
 
@@ -162,7 +166,10 @@ export function WhyRecycleLanding() {
                 </h3>
               </div>
 
-              <Button className="w-[80%] h-[80px] bg-[#152b26] text-white hover:bg-gray-900 text-[30px] rounded-lg mt-20">
+              <Button 
+                className="w-[80%] h-[80px] bg-[#152b26] text-white hover:bg-gray-900 text-[30px] rounded-lg mt-20"
+                onClick={onNavigateToRecycler}
+              >
                   Unlock SOL
               </Button>
             </div>
