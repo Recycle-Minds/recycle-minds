@@ -508,6 +508,63 @@ export class NFTService {
     throw new Error('MplCoreAsset burn fallback is not available; Core assets are not SPL tokens')
   }
 
+  // Check if an asset can be burned (not frozen, not delegated)
+  async canBurnAsset(mintAddress: string, owner: PublicKey): Promise<{ canBurn: boolean; reason?: string }> {
+    try {
+      // Get asset info via server-side API
+      const response = await fetch(`/api/asset?id=${mintAddress}`)
+      if (!response.ok) {
+        return { canBurn: true } // If we can't verify, allow the attempt
+      }
+      
+      const data = await response.json()
+      if (!data.asset) {
+        return { canBurn: true }
+      }
+      
+      const asset = data.asset
+      const assetInterface = asset.interface
+      
+      // Check if asset is frozen
+      // NOTE: pNFTs (ProgrammableNFT) can be burned even when frozen because burnV1 
+      // automatically handles thawing. Core NFTs and V1_NFTs cannot.
+      if (asset.ownership?.frozen) {
+        if (assetInterface === 'ProgrammableNFT') {
+          this.log('pNFT is frozen but burnV1 will automatically thaw it')
+          // Allow burning - burnV1 handles the thawing
+        } else {
+          return { 
+            canBurn: false, 
+            reason: 'This NFT is frozen and cannot be burned. It may be locked in a marketplace or have a freeze delegate. (pNFTs can be burned when frozen, but this is not a pNFT)'
+          }
+        }
+      }
+      
+      // Check if asset is delegated to someone else
+      if (asset.ownership?.delegated && asset.ownership?.delegate && 
+          asset.ownership.delegate !== owner.toString()) {
+        return { 
+          canBurn: false, 
+          reason: 'This NFT is delegated to another wallet. You must revoke the delegation before burning.'
+        }
+      }
+      
+      // Check if owner matches
+      if (asset.ownership?.owner !== owner.toString()) {
+        return { 
+          canBurn: false, 
+          reason: 'You are not the owner of this NFT.'
+        }
+      }
+      
+      return { canBurn: true }
+    } catch (error) {
+      this.log('Error checking if asset can be burned:', error)
+      // If we can't verify, allow the attempt (the blockchain will reject if needed)
+      return { canBurn: true }
+    }
+  }
+
   // Verify on-chain that an asset is actually gone/burned before updating stats
   async verifyBurnSuccess(mintAddress: string, owner: PublicKey, iface: string): Promise<boolean> {
     try {

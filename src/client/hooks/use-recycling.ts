@@ -38,8 +38,18 @@ export function useRecycling() {
           burningMints.push(nft.mint)
           setBurning(burningMints)
           
-          // Build and send the actual burn transaction
+          // Check if NFT can be burned (not frozen, not delegated)
           const service = new NFTService(connection)
+          const burnCheck = await service.canBurnAsset(nft.mint, publicKey)
+          if (!burnCheck.canBurn) {
+            console.error(`Cannot burn ${nft.mint}: ${burnCheck.reason}`)
+            toast.error(`Cannot burn ${nft.name}: ${burnCheck.reason}`, {
+              duration: 5000
+            })
+            continue // Skip this NFT
+          }
+          
+          // Build and send the actual burn transaction
           // Resolve authoritative interface via DAS to avoid misclassification
           let iface = nft.interface
           try {
@@ -160,8 +170,14 @@ export function useRecycling() {
     const loadingToast = toast.loading('Recycling NFT...', { id: `burn-${mintAddress}` })
 
     try {
-      // Build and send real transaction on mainnet
+      // Check if NFT can be burned (not frozen, not delegated)
       const service = new NFTService(connection)
+      const burnCheck = await service.canBurnAsset(mintAddress, publicKey)
+      if (!burnCheck.canBurn) {
+        throw new Error(burnCheck.reason || 'Cannot burn this NFT')
+      }
+      
+      // Build and send real transaction on mainnet
       
       // Resolve interface via DAS before building (use server-side API)
       let iface: string = 'V1_NFT'
