@@ -589,6 +589,16 @@ export class NFTService {
 
   // Build cleanup tx for an explicit list of token account pubkeys
   async buildCleanupTransactionForAccounts(owner: PublicKey, accounts: PublicKey[]): Promise<{ tx: Transaction; closedAccounts: PublicKey[] }> {
+    // Solana transaction size limit: ~1232 bytes
+    // Each close instruction: ~33 bytes
+    // Platform fee transfers: ~2 instructions (~66 bytes)
+    // Safe limit: 25 accounts per transaction
+    const MAX_ACCOUNTS_PER_TX = 25
+    
+    if (accounts.length > MAX_ACCOUNTS_PER_TX) {
+      throw new Error(`Too many accounts to close in one transaction. Maximum is ${MAX_ACCOUNTS_PER_TX}, requested ${accounts.length}. Please select fewer accounts.`)
+    }
+    
     this.log('Building targeted cleanup transaction for', accounts.length, 'accounts')
     const tx = new Transaction()
     const closed: PublicKey[] = []
