@@ -30,7 +30,7 @@ export function useRecycling() {
     const burnedMints: string[] = []
 
     setBurning(nfts.map(nft => nft.mint))
-    const loadingToast = toast.loading(`Starting to burn ${nfts.length} NFT(s)...`, { id: 'burning-collection' })
+    const loadingToast = toast.loading(`Starting to recycle ${nfts.length} NFT(s)...`, { id: 'burning-collection' })
 
     try {
       for (const nft of nfts) {
@@ -132,7 +132,7 @@ export function useRecycling() {
       toast.dismiss('burning-collection')
       
       if (burnedMints.length > 0) {
-        toast.success(`Successfully burned ${burnedMints.length} NFT(s)! Check your wallet and history.`, {
+        toast.success(`Successfully recycled ${burnedMints.length} NFT(s)! Check your wallet and history.`, {
           duration: 4000
         })
         
@@ -140,7 +140,7 @@ export function useRecycling() {
         console.log('Auto-refreshing NFT list after burn...')
         await fetchNFTs()
       } else {
-        toast.error('Failed to burn any NFTs. Please try again.', {
+        toast.error('Failed to recycle any NFTs. Please try again.', {
           duration: 5000
         })
       }
@@ -157,7 +157,7 @@ export function useRecycling() {
     if (!publicKey) throw new Error('No wallet')
 
     setBurning([mintAddress])
-    const loadingToast = toast.loading('Burning NFT...', { id: `burn-${mintAddress}` })
+    const loadingToast = toast.loading('Recycling NFT...', { id: `burn-${mintAddress}` })
 
     try {
       // Build and send real transaction on mainnet
@@ -261,7 +261,7 @@ export function useRecycling() {
       
       setBurnedNFTs(prev => [...prev, mintAddress])
       
-      toast.success('NFT burned successfully!', { id: `burn-${mintAddress}` })
+      toast.success('NFT recycled successfully!', { id: `burn-${mintAddress}` })
       
       // Auto-refresh NFT list after successful burn
       console.log('Auto-refreshing NFT list after single burn...')
@@ -269,8 +269,8 @@ export function useRecycling() {
       
       return true
     } catch (err) {
-      console.error(`Failed to burn NFT ${mintAddress}:`, err)
-      toast.error(`Failed to burn NFT: ${err instanceof Error ? err.message : 'Unknown error'}`, { 
+      console.error(`Failed to recycle NFT ${mintAddress}:`, err)
+      toast.error(`Failed to recycle NFT: ${err instanceof Error ? err.message : 'Unknown error'}`, { 
         id: `burn-${mintAddress}`,
         duration: 5000
       })
