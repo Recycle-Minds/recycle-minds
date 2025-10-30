@@ -12,19 +12,19 @@ export function RecycleMindsFooter() {
           </div>
 
           <div className="flex items-center justify-center gap-6 md:w-1/3">
-            <a href="https://x.com/recycle_minds" className="text-[#999999] hover:text-white transition-colors">
+            <a target="__blank" href="https://x.com/recycle_minds" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_x.png" alt="X" width={24} height={24} className="h-6 w-6" />
             </a>
-            <a href="https://www.instagram.com/recycle_minds/" className="text-[#999999] hover:text-white transition-colors">
+            <a target="__blank" href="https://www.instagram.com/recycle_minds/" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_instagram.png" alt="Instagram" width={24} height={24} className="h-6 w-6" />
             </a>
-            <a href="https://www.youtube.com/@RecycleMindsTV" className="text-[#999999] hover:text-white transition-colors">
+            <a target="__blank" href="https://www.youtube.com/@RecycleMindsTV" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_youtube.png" alt="YouTube" width={24} height={24} className="h-6 w-6" />
             </a>
-            <a href="#" className="text-[#999999] hover:text-white transition-colors">
+            <a target="__blank" href="https://www.linkedin.com/in/rogerio-timo88/" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_linkedin.png" alt="LinkedIn" width={24} height={24} className="h-6 w-6" />
             </a>
-            <a href="https://t.me/head_RecycleMinds" className="text-[#999999] hover:text-white transition-colors">
+            <a target="__blank" href="https://t.me/head_RecycleMinds" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_telegram.png" alt="Telegram" width={24} height={24} className="h-6 w-6" />
             </a>
           </div>
