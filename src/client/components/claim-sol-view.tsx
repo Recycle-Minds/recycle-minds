@@ -121,7 +121,7 @@ export function ClaimSolView() {
     <div className="mt-8">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">Claim your SOL</h2>
-        <p className="text-gray-400">Clean up empty token accounts and recover SOL rent</p>
+        <p className="text-[#41dbc6]">Clean up empty token accounts and recover SOL rent</p>
       </div>
 
       {/* Summary Card */}

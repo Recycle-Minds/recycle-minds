@@ -6,7 +6,7 @@ export function RewardsStore() {
       <div className="bg-[#1f1f1f] text-white px-4">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-white mb-2">Rewards Store</h2>
-          <p className="text-gray-400">Keep earning points! Exciting rewards are coming soon</p>
+          <p className="text-[#00ff00]">Keep earning points! Exciting rewards are coming soon</p>
         </div>
 
         {/* Grid de cards */}

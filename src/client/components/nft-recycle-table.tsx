@@ -181,7 +181,7 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
   return (
     <TooltipProvider>
       <div>
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
+      <div className="flex flex-col md:flex-col gap-4 mb-8">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <Input
@@ -191,26 +191,23 @@ export function NFTRecycleTable({ onViewCollection }: NFTRecycleTableProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <div className="flex md:flex-row text-center text-[12px] justify-center items-center font-medium text-[#878787] mb-2 pl-5"><span className="text-[20px] pr-1">&#x1F6C8;</span> If your NFT isn’t listed below, it can’t be recycled. Legacy NFTs (V1_NFT) are not displayed as they cannot be burned reliably. Only Core and pNFT collections are shown here.</div>
       </div>
+
 
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">Digital Recycler</h2>
-        <p className="text-gray-400">Recycle your unused NFTs and recover SOL rent</p>
+        <p className="text-[#11fe00]">Recycle your unused NFTs and recover SOL rent</p>
       </div>
 
       {filteredCollections.length === 0 ? (
         <div className="text-center py-16">
           <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-12 shadow-2xl shadow-black/50 border border-[#292929]">
             <h3 className="text-2xl font-bold text-gray-300 mb-4">No Collections Found</h3>
-            <p className="text-gray-500 text-lg mb-4">
+            <p className="text-gray-500 text-lg">
               {searchTerm ? 'Try adjusting your search terms' : 'You don\'t have any burnable NFT collections yet'}
             </p>
-            <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#292929]">
-              <p className="text-sm text-gray-400">
-                <span className="font-medium text-[#00ff00]">Note:</span> Legacy NFTs (V1_NFT) are not displayed as they cannot be burned reliably. 
-                Only Core and pNFT collections are shown here.
-              </p>
-            </div>
+            
           </div>
         </div>
       ) : (

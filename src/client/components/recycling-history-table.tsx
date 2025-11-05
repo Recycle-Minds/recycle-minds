@@ -60,7 +60,7 @@ export function RecyclingHistoryTable() {
       <div className="mt-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-white mb-2">Recycling History</h2>
-          <p className="text-gray-400">View your recycling history and environmental impact</p>
+          <p className="text-[#00fe00]">View your recycling history and environmental impact</p>
         </div>
         <div className="border border-[#292929] rounded-lg overflow-hidden">
           <div className="p-8 text-center">
@@ -132,7 +132,7 @@ export function RecyclingHistoryTable() {
     <div className="mt-8">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">HISTORY</h2>
-        <p className="text-gray-400">View your recycling history and environmental impact</p>
+        <p className="text-[#00fe00]">View your recycling history and environmental impact</p>
       </div>
 
       <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-6 shadow-2xl shadow-black/50 border border-[#292929] backdrop-blur-sm">
