@@ -12,11 +12,12 @@ import { WhyRecycleLanding } from "@/components/why-recycle-landing"
 import { RewardsStore } from "@/components/rewards-store"
 import { WhyRecycleBanner } from "@/components/why-recycle-banner"
 import { RecycleMindsFooter } from "@/components/recycle-minds-footer"
+import { Faq } from "@/components/faq"
 import { Toaster } from "react-hot-toast"
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<
-    "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle" | "rewards-store"
+    "digital-recycler" | "view-collection" | "recycling-history" | "claim-sol" | "why-recycle" | "rewards-store" | "faq"
   >("digital-recycler")
   const [selectedCollection, setSelectedCollection] = useState<string | undefined>(undefined)
 
@@ -28,14 +29,16 @@ export default function Page() {
         {/* Mobile: Show tabs first, then stats */}
         <div className="block md:hidden">
           <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
-          {activeTab !== "why-recycle" && <StatsCards />}
-          {activeTab === "why-recycle" && <WhyRecycleBanner />}
+          {!["why-recycle", "faq"].includes(activeTab) && <StatsCards />}
+          {activeTab === "why-recycle" && <WhyRecycleBanner title="Welcome to the World's First Digital Recycler"/>}
+          {activeTab === "faq" && <WhyRecycleBanner image="/banner_faq.jpg"/>}
         </div>
         
         {/* Desktop: Show stats first, then tabs */}
         <div className="hidden md:block">
-          {activeTab !== "why-recycle" && <StatsCards />}
-          {activeTab === "why-recycle" && <WhyRecycleBanner />}
+          {!["why-recycle", "faq"].includes(activeTab) && <StatsCards />}
+          {activeTab === "why-recycle" && <WhyRecycleBanner title="Welcome to the World's First Digital Recycler"/>}
+          {activeTab === "faq" && <WhyRecycleBanner image="/banner_faq.jpg"/>}
           <ActionButtons activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
         {activeTab === "digital-recycler" ? (
@@ -43,6 +46,8 @@ export default function Page() {
             setSelectedCollection(collectionAddress)
             setActiveTab("view-collection")
           }} />
+        ) : activeTab === "faq" ? (
+          <Faq/>
         ) : activeTab === "view-collection" ? (
           <NFTCollectionGrid collectionAddress={selectedCollection} />
         ) : activeTab === "recycling-history" ? (
