@@ -12,6 +12,9 @@ export function RecycleMindsFooter() {
           </div>
 
           <div className="flex items-center justify-center gap-6 md:w-1/3">
+           <a target="__blank" href="https://discord.gg/FBv6JAKxUY" className="text-[#999999] hover:text-white transition-colors">
+              <Image src="/logo_discord.png" alt="Discord" width={24} height={24} className="h-6 w-6" />
+            </a>
             <a target="__blank" href="https://x.com/recycle_minds" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_x.png" alt="X" width={24} height={24} className="h-6 w-6" />
             </a>
@@ -20,9 +23,6 @@ export function RecycleMindsFooter() {
             </a>
             <a target="__blank" href="https://www.youtube.com/@RecycleMindsTV" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_youtube.png" alt="YouTube" width={24} height={24} className="h-6 w-6" />
-            </a>
-            <a target="__blank" href="https://www.linkedin.com/in/rogerio-timo88/" className="text-[#999999] hover:text-white transition-colors">
-              <Image src="/logo_social_linkedin.png" alt="LinkedIn" width={24} height={24} className="h-6 w-6" />
             </a>
             <a target="__blank" href="https://t.me/head_RecycleMinds" className="text-[#999999] hover:text-white transition-colors">
               <Image src="/logo_social_telegram.png" alt="Telegram" width={24} height={24} className="h-6 w-6" />
